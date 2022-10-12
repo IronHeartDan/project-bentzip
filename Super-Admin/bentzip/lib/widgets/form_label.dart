@@ -1,4 +1,4 @@
-import 'package:bentzip/constants.dart';
+import 'package:bentzip/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 

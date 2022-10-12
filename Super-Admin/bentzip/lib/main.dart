@@ -1,6 +1,5 @@
-import 'package:bentzip/screens/home_screen_big.dart';
-import 'package:bentzip/screens/home_screen_medium.dart';
-import 'package:bentzip/screens/home_screen_small.dart';
+import 'package:bentzip/screens/splash_screen.dart';
+import 'package:bentzip/states/connection_state.dart';
 import 'package:bentzip/states/nav_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -18,8 +17,11 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider<NavState>(create: (context) => NavState()),
+        BlocProvider<AppConnectionState>(
+            create: (context) => AppConnectionState()),
       ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Bentzip',
         theme: ThemeData(
           // This is the theme of your application.
@@ -32,27 +34,10 @@ class MyApp extends StatelessWidget {
           // Notice that the counter didn't reset back to zero; the application
           // is not restarted.
           primarySwatch: Colors.blue,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        home: const Responsive(),
+        home: const SplashScreen(),
       ),
     );
-  }
-}
-
-class Responsive extends StatelessWidget {
-  const Responsive({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      var maxWidth = constraints.maxWidth;
-      if (maxWidth <= 500) {
-        return const HomeScreenSmall();
-      }
-      if (maxWidth <= 1100) {
-        return const HomeScreenMedium();
-      }
-      return const HomeScreenBIg();
-    });
   }
 }

@@ -3,36 +3,38 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hexcolor/hexcolor.dart';
 
-import '../constants.dart';
 import '../models/MenuModel.dart';
+import '../utils/constants.dart';
 
 class CustomDrawer extends StatefulWidget {
   final bool hide;
+  final int prev;
 
-  const CustomDrawer({Key? key, required this.hide}) : super(key: key);
+  const CustomDrawer({Key? key, required this.hide, required this.prev})
+      : super(key: key);
 
   @override
   State<CustomDrawer> createState() => _CustomDrawerState();
 }
 
 class _CustomDrawerState extends State<CustomDrawer> {
+  late int selected;
 
+  @override
+  void initState() {
+    selected = widget.prev;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<NavState, int>(builder: (blocContext, state) {
+      if (state != -1) selected = state;
       return Drawer(
         elevation: 0,
         backgroundColor: HexColor("#3D3774"),
         child: Column(
           children: [
-            AppBar(
-              elevation: 0,
-              backgroundColor: Colors.transparent,
-              leading: const Icon(Icons.logo_dev),
-              titleSpacing: 0,
-              title: const Text("Bentzip"),
-            ),
             Expanded(
               child: ListView.builder(
                   itemCount: sideNavs.length,
@@ -52,7 +54,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                         tileColor: Colors.transparent,
                         iconColor: secondaryColor,
                         textColor: secondaryColor,
-                        selected: index == state,
+                        selected: index == selected,
                         selectedTileColor: secondaryColor,
                         selectedColor: primaryColor,
                         shape: const RoundedRectangleBorder(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../constants.dart';
+import '../utils/constants.dart';
 
 class SecondaryButton extends StatefulWidget {
   final void Function() onPress;
@@ -19,10 +19,10 @@ class _SecondaryButtonState extends State<SecondaryButton> {
     return ElevatedButton(
         clipBehavior: Clip.hardEdge,
         style: ElevatedButton.styleFrom(
-            onPrimary: primaryColor,
+            foregroundColor: primaryColor,
+            backgroundColor: secondaryColor,
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 43),
             elevation: 0,
-            primary: Colors.transparent,
             shape: RoundedRectangleBorder(
                 side: BorderSide(
                   color: primaryColor,

@@ -1,6 +1,8 @@
-import 'package:bentzip/widgets/add_school_form.dart';
+import 'package:bentzip/screens/add_school_form.dart';
+import 'package:bentzip/screens/schools_table.dart';
+import 'package:bentzip/utils/constants.dart';
+import 'package:bentzip/utils/responsive.dart';
 import 'package:bentzip/widgets/primary_buttton.dart';
-import 'package:bentzip/widgets/schools_table.dart';
 import 'package:bentzip/widgets/secondary_buttton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,7 +16,8 @@ class AddSchool extends StatefulWidget {
   State<AddSchool> createState() => _AddSchoolState();
 }
 
-class _AddSchoolState extends State<AddSchool> {
+class _AddSchoolState extends State<AddSchool>
+    with AutomaticKeepAliveClientMixin {
   final _navController = PageController();
   double currentNav = 0;
 
@@ -30,179 +33,107 @@ class _AddSchoolState extends State<AddSchool> {
     super.initState();
   }
 
+  Future _handleNav() async {
+    if (currentNav == 1) {
+      context.read<NavState>().setNav(1);
+      _navController.animateToPage(0,
+          duration: const Duration(milliseconds: 200), curve: Curves.ease);
+    } else {
+      context.read<NavState>().setNav(0);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
+    super.build(context);
+    return WillPopScope(
+      onWillPop: () async {
+        _handleNav();
+        return false;
+      },
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Column(
           children: [
-            SecondaryButton(
-                text: "Back",
-                onPress: () {
-                  if (currentNav == 1) {
+            !Responsive.isSmall(context)
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      SecondaryButton(
+                          text: "Back",
+                          onPress: () {
+                            _handleNav();
+                          }),
+                      const SizedBox(
+                        width: 20,
+                      ),
+                      Visibility(
+                        visible: currentNav == 0,
+                        child: PrimaryButton(
+                          text: "Add School",
+                          onPress: () {
+                            context.read<NavState>().setNav(-1);
+                            _navController.animateToPage(1,
+                                duration: const Duration(milliseconds: 200),
+                                curve: Curves.ease);
+                          },
+                        ),
+                      )
+                    ],
+                  )
+                : const FittedBox(),
+            !Responsive.isSmall(context)
+                ? const SizedBox(
+                    height: 20,
+                  )
+                : const FittedBox(),
+            Expanded(
+                child: Card(
+              clipBehavior: Clip.hardEdge,
+              elevation: 0,
+              shape: !Responsive.isSmall(context)
+                  ? const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(20)))
+                  : null,
+              child: BlocListener<NavState, int>(
+                listener: (blocContext, navState) {
+                  if (navState == 1) {
                     _navController.animateToPage(0,
-                        duration: const Duration(milliseconds: 200),
-                        curve: Curves.ease);
-                  } else {
-                    context.read<NavState>().setNav(0);
+                        duration: const Duration(milliseconds: 200), curve: Curves.ease);
                   }
-                }),
-            const SizedBox(
-              width: 20,
-            ),
-            Visibility(
-              visible: currentNav == 0,
-              child: PrimaryButton(
-                text: "Add School",
-                onPress: () {
-                  _navController.animateToPage(1,
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.ease);
                 },
+                child: PageView(
+                  controller: _navController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: const [
+                    SchoolsTable(),
+                    AddSchoolForm(),
+                  ],
+                ),
               ),
-            )
+            ))
           ],
         ),
-        const SizedBox(
-          height: 20,
-        ),
-        Expanded(
-            child: Card(
-          clipBehavior: Clip.hardEdge,
-          elevation: 0,
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(20))),
-          child: PageView(
-            controller: _navController,
-            children: const [
-              SchoolsTable(),
-              AddSchoolForm(),
-            ],
-          ),
-        ))
-      ],
+        floatingActionButton: Responsive.isSmall(context)
+            ? AnimatedScale(
+                scale: currentNav == 1 ? 0 : 1,
+                duration: const Duration(milliseconds: 100),
+                child: FloatingActionButton(
+                  backgroundColor: primaryDarkColor,
+                  onPressed: () {
+                    context.read<NavState>().setNav(-1);
+                    _navController.animateToPage(1,
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.ease);
+                  },
+                  child: const Icon(Icons.add),
+                ),
+              )
+            : null,
+      ),
     );
   }
 
-  List<DataColumn> getColumns() {
-    var columns = [
-      "School name",
-      "Code",
-      "Contact no.",
-      "Email",
-      "Date Of Incorporation",
-      "Active"
-    ];
-    return columns.map((e) => DataColumn(label: Text(e))).toList();
-  }
-
-  List<DataRow> getRows() {
-    return const [
-      DataRow(cells: [
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-      ]),
-      DataRow(cells: [
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-      ]),
-      DataRow(cells: [
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-      ]),
-      DataRow(cells: [
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-      ]),
-      DataRow(cells: [
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-      ]),
-      DataRow(cells: [
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-      ]),
-      DataRow(cells: [
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-      ]),
-      DataRow(cells: [
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-      ]),
-      DataRow(cells: [
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-      ]),
-      DataRow(cells: [
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-      ]),
-      DataRow(cells: [
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-      ]),
-      DataRow(cells: [
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-      ]),
-      DataRow(cells: [
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-        DataCell(Text("0")),
-      ]),
-    ];
-  }
+  @override
+  bool get wantKeepAlive => true;
 }

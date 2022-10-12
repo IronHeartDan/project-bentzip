@@ -9,12 +9,12 @@ const DB = require("./mongoose/database");
 const app = express();
 app.use(express.json());
 const server = require("http").createServer(app);
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // Models Import
-const SchoolModel = require("./models/school");
+const Class = require("./models/class");
 const Counter = require("./models/counter");
-const mainCounter = require("./models/mainCounter");
+const User = require("./models/user");
 
 DB.connectDB()
   .then(() => {
@@ -31,30 +31,33 @@ async function startServer() {
     res.status(200).send("Bentzip Server Running");
   });
 
-  app.post("/setMainCounter", async (req, res) => {
-    try {
-      let counter = new mainCounter({
-        _id: 0,
-      });
-
-      await counter.save();
-      res.status(200).send("OK");
-    } catch (error) {
-      console.log(error);
-      res.status(200).send(error);
+  // Add Class
+  app.post("/addClass", async (req, res) => {
+    if (checkBody(req.body)) {
+      try {
+        // Save Class
+        let model = new Class(req.body);
+        await model.save();
+        res.status(200).send();
+      } catch (error) {
+        res.status(500).send(error);
+        console.error(error);
+      }
+    } else {
+      res.status(400).send("Request Body not found");
     }
   });
+  // Add Class
 
-  // Add School
-  app.post("/addSchool", async (req, res) => {
-    var isEmpty = Object.keys(req.body).length == 0;
+  // Add Teacher
+  app.post("/addTeacher", async (req, res) => {
     let body = req.body;
-    if (body && !isEmpty) {
+    if (checkBody(body)) {
       let session = await mongoose.startSession();
       try {
         let results = await session.withTransaction(async () => {
           // Save School
-          let school = new SchoolModel(body);
+          let user = new User(body);
           await school.save({ session: session });
 
           // Increment School Count
@@ -94,21 +97,19 @@ async function startServer() {
     }
   });
 
-  // End Of Add School
-
-  // Activate / Deactivate School
-
-  app.post("/setSchoolStatus", (req, res) => {
-    var isEmpty = Object.keys(req.body).length == 0;
-    let body = req.body;
-    if (body && !isEmpty) {
-    } else {
-      res.status(400).send("Request Body not found");
-    }
-  });
+  // End Of Add Teacher
 
   // Server Listening
   server.listen(PORT, () => {
     console.log(`Bentzip Server Running On Port ${PORT}`);
   });
+}
+
+function checkBody(body) {
+  let isEmpty = Object.keys(body).length == 0;
+  if (body && !isEmpty) {
+    return true;
+  } else {
+    return false;
+  }
 }

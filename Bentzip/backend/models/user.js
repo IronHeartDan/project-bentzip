@@ -1,39 +1,14 @@
 const mongoose = require("mongoose");
 
-const School = mongoose.model(
-  "school",
+const User = mongoose.model(
+  "user",
   new mongoose.Schema({
     _id: {
-      type: Number,
+      type: String,
       trim: true,
       required: true,
     },
     name: {
-      type: String,
-      trim: true,
-      required: true,
-    },
-    principal: {
-      type: String,
-      trim: true,
-      required: true,
-    },
-    email: {
-      type: String,
-      trim: true,
-      required: true,
-      unique: true,
-    },
-    website: {
-      type: String,
-      trim: true,
-    },
-    state: {
-      type: String,
-      trim: true,
-      required: true,
-    },
-    city: {
       type: String,
       trim: true,
       required: true,
@@ -43,24 +18,29 @@ const School = mongoose.model(
       trim: true,
       required: true,
     },
+    dob: {
+      type: Date,
+      required: true,
+    },
+    school: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+    class: {
+      type: String,
+      trim: true,
+    },
+    role: {
+      type: Number,
+      required: true,
+    },
     contact: {
       type: [Number],
       trim: true,
       required: true,
     },
-    doi: {
-      type: Date,
-      required: true,
-    },
-    joined: {
-      type: Date,
-      default: Date.now(),
-    },
-    active: {
-      type: Boolean,
-      required: true,
-    },
   })
 );
 
-module.exports = School;
+module.exports = User;
