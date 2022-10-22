@@ -36,7 +36,7 @@ const User = mongoose.model(
       trim: true,
       required: true,
     },
-  })
+  }), "users"
 );
 
 module.exports = User;

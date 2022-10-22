@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:bentzip/screens/add_school_form.dart';
 import 'package:bentzip/screens/schools_table.dart';
 import 'package:bentzip/utils/constants.dart';
@@ -52,6 +54,7 @@ class _AddSchoolState extends State<AddSchool>
         return false;
       },
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         backgroundColor: Colors.transparent,
         body: Column(
           children: [
@@ -105,9 +108,9 @@ class _AddSchoolState extends State<AddSchool>
                 child: PageView(
                   controller: _navController,
                   physics: const NeverScrollableScrollPhysics(),
-                  children: const [
-                    SchoolsTable(),
-                    AddSchoolForm(),
+                  children:  [
+                    const SchoolsTable(),
+                    AddSchoolForm(handleNav: _handleNav),
                   ],
                 ),
               ),

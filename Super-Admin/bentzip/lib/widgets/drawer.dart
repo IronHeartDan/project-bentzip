@@ -37,9 +37,9 @@ class _CustomDrawerState extends State<CustomDrawer> {
           children: [
             Expanded(
               child: ListView.builder(
-                  itemCount: sideNavs.length,
+                  itemCount: sideNav.length,
                   itemBuilder: (context, index) {
-                    MenuModel menu = sideNavs[index];
+                    MenuModel menu = sideNav[index];
                     return Container(
                       margin: const EdgeInsets.only(top: 30),
                       padding: const EdgeInsets.only(left: 46),

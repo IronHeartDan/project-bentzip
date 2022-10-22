@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:http/http.dart' as http;
 
 import '../models/MenuModel.dart';
 
@@ -14,7 +15,7 @@ final yellow = HexColor("#FCC43E");
 final green = HexColor("#219653");
 final red = HexColor("#F90706");
 
-final sideNavs = [
+final sideNav = [
   MenuModel(Icons.dashboard, "Dashboard"),
   MenuModel(Icons.add_box_outlined, "Add School"),
   MenuModel(Icons.payment, "Payment"),
@@ -22,4 +23,4 @@ final sideNavs = [
   MenuModel(Icons.analytics, "Report"),
 ];
 
-const String serverURL = "http://192.168.0.152:3000";
+const String serverURL = "http://192.168.1.38:3000";

@@ -3,7 +3,11 @@
 // Imports
 const express = require("express");
 const { default: mongoose } = require("mongoose");
+const dotenv = require("dotenv");
 const DB = require("./mongoose/database");
+const verify = require("./authVerify");
+const jwt = require("jsonwebtoken");
+
 
 // Configs
 const app = express();
@@ -15,6 +19,7 @@ const PORT = process.env.PORT || 3000;
 const SchoolModel = require("./models/school");
 const Counter = require("./models/counter");
 const mainCounter = require("./models/mainCounter");
+const SuperAdmin = require("./models/superAdmin");
 
 DB.connectDB()
   .then(() => {
@@ -26,12 +31,64 @@ DB.connectDB()
 // Start Server
 
 async function startServer() {
+
+  // Config Env
+  dotenv.config();
+
   // Base Server Request
   app.get("/", (req, res) => {
     res.status(200).send("Bentzip Server Running");
   });
 
-  app.post("/setMainCounter", async (req, res) => {
+
+  // Super Admin Auth
+
+  // Create Super Admin
+  app.post("/createSuperAdmin", async (req, res) => {
+    var isEmpty = Object.keys(req.body).length == 0;
+    let body = req.body;
+    if (body && !isEmpty) {
+      try {
+        let superAdmin = new SuperAdmin(body);
+        await superAdmin.save();
+        res.status(200).send("OK");
+      } catch (error) {
+        console.log(error);
+        res.status(200).send(error);
+      }
+    } else {
+      res.status(400).send("Request Body not found");
+    }
+  });
+
+
+  // Log Auper Admin
+  app.post("/logSuperAdmin", async (req, res) => {
+    var isEmpty = Object.keys(req.body).length == 0;
+    let body = req.body;
+    if (body && !isEmpty) {
+      console.log(body);
+      try {
+        let superAdmin = await SuperAdmin.findOne({
+          email: body.email,
+        });
+
+        if (!superAdmin) return res.status(400).send({ "email": -1 });
+
+        if (superAdmin.password != body.password) return res.status(400).send({ "password": -1 });
+
+        let token = jwt.sign(body, process.env.JSON_SECRET);
+        res.header("auth-token", token).send(token);
+      } catch (error) {
+        res.status(500).send(error);
+      }
+    } else {
+      res.status(400).send("Request Body not found");
+    }
+  });
+
+  //Main Counter
+  app.post("/setMainCounter", verify, async (req, res) => {
     try {
       let counter = new mainCounter({
         _id: 0,
@@ -46,7 +103,7 @@ async function startServer() {
   });
 
   // Add School
-  app.post("/addSchool", async (req, res) => {
+  app.post("/addSchool", verify, async (req, res) => {
     var isEmpty = Object.keys(req.body).length == 0;
     let body = req.body;
     if (body && !isEmpty) {

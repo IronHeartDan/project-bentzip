@@ -37,11 +37,10 @@ class _PaymentScreenState extends State<PaymentScreen>
                   height: 500,
                   child: GridView.builder(
                       itemCount: 3,
-                      gridDelegate:
-                           SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: Responsive.isSmall(context) ? 2 : 3,
-                              // childAspectRatio: (5 / 2),
-                          ),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: Responsive.isSmall(context) ? 1 : 3,
+                          childAspectRatio: (4 / 1),
+                          mainAxisSpacing: 2),
                       itemBuilder: (context, index) {
                         var tile = tiles[index];
                         return InfoTile(tile: tile);

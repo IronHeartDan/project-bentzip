@@ -23,7 +23,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final pageController = PageController();
   ScaffoldFeatureController? connectionBar;
-  String currentTitle = sideNavs[0].title;
+  String currentTitle = sideNav[0].title;
   int last = 0;
 
   @override
@@ -33,10 +33,8 @@ class _HomeScreenState extends State<HomeScreen> {
           result == ConnectivityResult.wifi ||
           result == ConnectivityResult.ethernet) {
         context.read<AppConnectionState>().setConnection(true);
-        print("Setting True");
       } else {
         context.read<AppConnectionState>().setConnection(false);
-        print("Setting False");
       }
     });
     super.initState();
@@ -47,10 +45,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return BlocListener<AppConnectionState, bool>(
       listener: (_, state) {
         if (state) {
-          print("Got True");
           connectionBar?.close();
         } else {
-          print("Got False");
           connectionBar =
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             dismissDirection: DismissDirection.none,
@@ -63,9 +59,10 @@ class _HomeScreenState extends State<HomeScreen> {
       child: BlocBuilder<NavState, int>(builder: (blocContext, navState) {
         if (navState != -1) {
           last = navState;
-          currentTitle = sideNavs[navState].title;
+          currentTitle = sideNav[navState].title;
         }
         return Scaffold(
+          resizeToAvoidBottomInset: false,
           appBar: Responsive.isSmall(context)
               ? AppBar(
                   elevation: 0,
