@@ -1,15 +1,11 @@
-import 'dart:convert';
-
 import 'package:bentzip/models/school.dart';
-import 'package:bentzip/utils/constants.dart';
+import 'package:bentzip/utils/api.dart';
 import 'package:bentzip/utils/responsive.dart';
 import 'package:bentzip/widgets/form_input.dart';
 import 'package:bentzip/widgets/form_label.dart';
 import 'package:bentzip/widgets/primary_buttton.dart';
 import 'package:country_state_city/country_state_city.dart' as csc;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
 class AddSchoolForm extends StatefulWidget {
@@ -30,6 +26,7 @@ class _AddSchoolFormState extends State<AddSchoolForm> {
 
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _editingControllerDoi = TextEditingController();
+  final TextEditingController _editingControllerPass = TextEditingController();
   final School _school = School();
 
   @override
@@ -71,43 +68,6 @@ class _AddSchoolFormState extends State<AddSchoolForm> {
     setState(() {});
   }
 
-  Future<bool> _saveSchool() async {
-    showDialog(
-        barrierDismissible: false,
-        context: context,
-        builder: (buildContext) {
-          return AlertDialog(
-            backgroundColor: primaryColor,
-            content: SizedBox(
-                width: 150,
-                height: 150,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const CircularProgressIndicator(
-                      color: Colors.white,
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    Text(
-                      "Adding School",
-                      style: GoogleFonts.poppins(color: Colors.white),
-                    ),
-                  ],
-                )),
-          );
-        });
-
-    await Future.delayed(const Duration(seconds: 2));
-
-    var body = jsonEncode(_school.toJson());
-    var res = await http.post(Uri.parse("$serverURL/addSchool"),
-        headers: {"Content-Type": "application/json"}, body: body);
-
-    return res.statusCode == 200;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -127,6 +87,7 @@ class _AddSchoolFormState extends State<AddSchoolForm> {
                   direction: Responsive.isSmall(context)
                       ? Axis.vertical
                       : Axis.horizontal,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       flex: Responsive.isSmall(context) ? 0 : 1,
@@ -180,23 +141,25 @@ class _AddSchoolFormState extends State<AddSchoolForm> {
                     ),
                   ],
                 ),
-                const SizedBox(
-                  height: 30,
+                SizedBox(
+                  height: Responsive.isSmall(context) ? 24 : 30,
                 ),
                 Flex(
-                  direction: Responsive.isSmall(context)
+                  direction: MediaQuery.of(context).size.width < 1200
                       ? Axis.vertical
                       : Axis.horizontal,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                        flex: Responsive.isSmall(context) ? 0 : 1,
+                        flex: MediaQuery.of(context).size.width < 1200 ? 0 : 1,
                         child: Flex(
-                          direction: Responsive.isSmall(context)
+                          direction: MediaQuery.of(context).size.width < 1200
                               ? Axis.vertical
                               : Axis.horizontal,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Expanded(
-                              flex: Responsive.isSmall(context) ? 0 : 1,
+                              flex: MediaQuery.of(context).size.width < 1200 ? 0 : 1,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -238,11 +201,12 @@ class _AddSchoolFormState extends State<AddSchoolForm> {
                                 ],
                               ),
                             ),
-                            const SizedBox(
-                              width: 24,
+                            SizedBox(
+                              width: Responsive.isSmall(context) ? 0 : 24,
+                              height: Responsive.isSmall(context) ? 24 : 0,
                             ),
                             Expanded(
-                              flex: Responsive.isSmall(context) ? 0 : 1,
+                              flex: MediaQuery.of(context).size.width < 1200 ? 0 : 1,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -267,11 +231,12 @@ class _AddSchoolFormState extends State<AddSchoolForm> {
                             ),
                           ],
                         )),
-                    const SizedBox(
-                      width: 24,
+                    SizedBox(
+                      width: Responsive.isSmall(context) ? 0 : 24,
+                      height: Responsive.isSmall(context) ? 24 : 0,
                     ),
                     Expanded(
-                      flex: Responsive.isSmall(context) ? 0 : 1,
+                      flex: MediaQuery.of(context).size.width < 1200 ? 0 : 1,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -294,12 +259,17 @@ class _AddSchoolFormState extends State<AddSchoolForm> {
                     ),
                   ],
                 ),
-                const SizedBox(
-                  height: 30,
+                SizedBox(
+                  height: Responsive.isSmall(context) ? 24 : 30,
                 ),
-                Row(
+                Flex(
+                  direction: Responsive.isSmall(context)
+                      ? Axis.vertical
+                      : Axis.horizontal,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
+                      flex: Responsive.isSmall(context) ? 0 : 1,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -321,10 +291,12 @@ class _AddSchoolFormState extends State<AddSchoolForm> {
                         ],
                       ),
                     ),
-                    const SizedBox(
-                      width: 24,
+                    SizedBox(
+                      width: Responsive.isSmall(context) ? 0 : 24,
+                      height: Responsive.isSmall(context) ? 24 : 0,
                     ),
                     Expanded(
+                      flex: Responsive.isSmall(context) ? 0 : 1,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -347,13 +319,14 @@ class _AddSchoolFormState extends State<AddSchoolForm> {
                     ),
                   ],
                 ),
-                const SizedBox(
-                  height: 30,
+                SizedBox(
+                  height: Responsive.isSmall(context) ? 24 : 30,
                 ),
                 Flex(
                   direction: Responsive.isSmall(context)
                       ? Axis.vertical
                       : Axis.horizontal,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       flex: Responsive.isSmall(context) ? 0 : 1,
@@ -391,8 +364,9 @@ class _AddSchoolFormState extends State<AddSchoolForm> {
                         ],
                       ),
                     ),
-                    const SizedBox(
-                      width: 24,
+                    SizedBox(
+                      width: Responsive.isSmall(context) ? 0 : 24,
+                      height: Responsive.isSmall(context) ? 24 : 0,
                     ),
                     Expanded(
                       flex: Responsive.isSmall(context) ? 0 : 1,
@@ -429,8 +403,9 @@ class _AddSchoolFormState extends State<AddSchoolForm> {
                         ],
                       ),
                     ),
-                    const SizedBox(
-                      width: 24,
+                    SizedBox(
+                      width: Responsive.isSmall(context) ? 0 : 24,
+                      height: Responsive.isSmall(context) ? 24 : 0,
                     ),
                     Expanded(
                       flex: Responsive.isSmall(context) ? 0 : 1,
@@ -442,7 +417,7 @@ class _AddSchoolFormState extends State<AddSchoolForm> {
                             height: 16,
                           ),
                           TextFormField(
-                            textInputAction: TextInputAction.done,
+                            textInputAction: TextInputAction.next,
                             onSaved: (val) {
                               _school.address = val;
                             },
@@ -461,8 +436,70 @@ class _AddSchoolFormState extends State<AddSchoolForm> {
                     ),
                   ],
                 ),
-                const SizedBox(
-                  height: 30,
+                SizedBox(
+                  height: Responsive.isSmall(context) ? 24 : 30,
+                ),
+                Flex(
+                  direction: Responsive.isSmall(context)
+                      ? Axis.vertical
+                      : Axis.horizontal,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: Responsive.isSmall(context) ? 0 : 1,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const FormLabel(text: "Admin Password *"),
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          FormInput(
+                            textEditingController: _editingControllerPass,
+                            obscureText: true,
+                            textInputAction: TextInputAction.next,
+                            validator: (val) {
+                              if (val == null || val.isEmpty) return "Required";
+                              return null;
+                            },
+                            label: "Create Password",
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      width: Responsive.isSmall(context) ? 0 : 24,
+                      height: Responsive.isSmall(context) ? 24 : 0,
+                    ),
+                    Expanded(
+                      flex: Responsive.isSmall(context) ? 0 : 1,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const FormLabel(text: "Confirm Password *"),
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          FormInput(
+                            textInputAction: TextInputAction.done,
+                            obscureText: true,
+                            onSaved: (val) {
+                              _school.password = val;
+                            },
+                            validator: (val) {
+                              if (val == null || val.isEmpty) return "Required";
+                              if(val != _editingControllerPass.text) return "Password Doesn't Match";
+                              return null;
+                            },
+                            label: "Check",
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: Responsive.isSmall(context) ? 24 : 30,
                 ),
                 Row(
                   children: [
@@ -472,26 +509,11 @@ class _AddSchoolFormState extends State<AddSchoolForm> {
                         if (_formKey.currentState!.validate()) {
                           _formKey.currentState!.save();
                           _school.active = true;
-                          var saved = await _saveSchool();
+                          var saved = await Api.saveSchool(context, _school);
+                          if (!mounted) return;
+                          Navigator.pop(context);
                           if (saved) {
-                            if (!mounted) return;
-                            Navigator.pop(context);
                             widget.handleNav();
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(const SnackBar(
-                              backgroundColor: Colors.green,
-                              content: Text("School Added"),
-                              duration: Duration(seconds: 5),
-                            ));
-                          } else {
-                            if (!mounted) return;
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(const SnackBar(
-                              backgroundColor: Colors.red,
-                              content: Text("Try Again"),
-                              duration: Duration(seconds: 5),
-                            ));
                           }
                         }
                       },

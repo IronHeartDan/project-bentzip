@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:bentzip/utils/api.dart';
 import 'package:bentzip/utils/constants.dart';
 import 'package:bentzip/utils/responsive.dart';
 import 'package:flutter/material.dart';
@@ -45,6 +46,7 @@ class _AuthScreenState extends State<AuthScreen> {
     if (res.statusCode == 200) {
       await secureStorage.write(key: "auth-token", value: res.body);
       if (!mounted) return;
+      Api.token = res.body;
       Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const HomeScreen()),
           (route) => false);
@@ -57,13 +59,17 @@ class _AuthScreenState extends State<AuthScreen> {
 
       if (!mounted) return;
       if (resBody["email"] == -1) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text("Email Not Found"),backgroundColor: Colors.red,));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Email Not Found"),
+          backgroundColor: Colors.red,
+        ));
         return;
       }
       if (resBody["password"] == -1) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text("Incorrect Password"),backgroundColor: Colors.red,));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Incorrect Password"),
+          backgroundColor: Colors.red,
+        ));
       }
     }
   }
@@ -149,6 +155,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       height: 10,
                     ),
                     TextFormField(
+                      textInputAction: TextInputAction.next,
                       onSaved: (val) {
                         email = val;
                       },
@@ -188,6 +195,8 @@ class _AuthScreenState extends State<AuthScreen> {
                       height: 10,
                     ),
                     TextFormField(
+                      obscureText: true,
+                      textInputAction: TextInputAction.done,
                       onSaved: (val) {
                         password = val;
                       },

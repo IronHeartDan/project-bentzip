@@ -8,13 +8,15 @@ class FormInput extends StatelessWidget {
   final TextEditingController? textEditingController;
   final TextInputType? textInputType;
   final TextInputAction? textInputAction;
+  final bool? obscureText;
 
-  const FormInput({Key? key, this.label, this.onTap, this.validator, this.textEditingController, this.textInputType, this.textInputAction, this.onSaved}) : super(key: key);
+  const FormInput({Key? key, this.label, this.onTap, this.validator, this.textEditingController, this.textInputType, this.textInputAction, this.onSaved,  this.obscureText}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       keyboardType: textInputType,
+      obscureText: obscureText ?? false,
       validator: validator,
       onSaved: onSaved,
       onTap: onTap,

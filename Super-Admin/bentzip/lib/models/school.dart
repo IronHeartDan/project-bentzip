@@ -10,6 +10,7 @@ class School{
   String? city;
   String? address;
   bool? active;
+  String? password;
 
   Map<String, dynamic> toJson(){
      return {
@@ -22,7 +23,8 @@ class School{
        "address":address,
        "contact":List.of({contact}),
        "doi":doi.toString(),
-       "active":active
+       "active":active,
+       "password":password,
      };
    }
 

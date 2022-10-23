@@ -19,7 +19,7 @@ const PORT = process.env.PORT || 3000;
 const SchoolModel = require("./models/school");
 const Counter = require("./models/counter");
 const mainCounter = require("./models/mainCounter");
-const SuperAdmin = require("./models/superAdmin");
+const Admin = require("./models/admin");
 
 DB.connectDB()
   .then(() => {
@@ -42,43 +42,17 @@ async function startServer() {
 
 
   // Super Admin Auth
-
-  // Create Super Admin
-  app.post("/createSuperAdmin", async (req, res) => {
-    var isEmpty = Object.keys(req.body).length == 0;
-    let body = req.body;
-    if (body && !isEmpty) {
-      try {
-        let superAdmin = new SuperAdmin(body);
-        await superAdmin.save();
-        res.status(200).send("OK");
-      } catch (error) {
-        console.log(error);
-        res.status(200).send(error);
-      }
-    } else {
-      res.status(400).send("Request Body not found");
-    }
-  });
-
-
-  // Log Auper Admin
   app.post("/logSuperAdmin", async (req, res) => {
     var isEmpty = Object.keys(req.body).length == 0;
     let body = req.body;
     if (body && !isEmpty) {
-      console.log(body);
       try {
-        let superAdmin = await SuperAdmin.findOne({
-          email: body.email,
-        });
+        if (process.env.ADMIN != body.email) return res.status(400).send({ "email": -1 });
 
-        if (!superAdmin) return res.status(400).send({ "email": -1 });
-
-        if (superAdmin.password != body.password) return res.status(400).send({ "password": -1 });
+        if (process.env.ADMIN_PASSWORD != body.password) return res.status(400).send({ "password": -1 });
 
         let token = jwt.sign(body, process.env.JSON_SECRET);
-        res.header("auth-token", token).send(token);
+        res.status(200).send(token);
       } catch (error) {
         res.status(500).send(error);
       }
@@ -97,7 +71,6 @@ async function startServer() {
       await counter.save();
       res.status(200).send("OK");
     } catch (error) {
-      console.log(error);
       res.status(200).send(error);
     }
   });
@@ -109,7 +82,7 @@ async function startServer() {
     if (body && !isEmpty) {
       let session = await mongoose.startSession();
       try {
-        let results = await session.withTransaction(async () => {
+         await session.withTransaction(async () => {
           // Save School
           let school = new SchoolModel(body);
           await school.save({ session: session });
@@ -135,6 +108,16 @@ async function startServer() {
           });
           await counter.save({ session: session });
 
+          // Create Admin
+          let id = `${new Date().getFullYear()}${count.schoolCount}0001`;
+          let admin = new Admin({
+            _id: id,
+            password: body.password,
+            school: school._id,
+            role: 0,
+          });
+          await admin.save({ session: session });
+
           // Commit Transaction
           await session.commitTransaction();
 
@@ -142,7 +125,7 @@ async function startServer() {
           res.status(200).send("OK");
         });
       } catch (error) {
-        res.status(500).send(error);
+        res.status(400).send(error);
       } finally {
         await session.endSession();
       }

@@ -1,5 +1,6 @@
 import 'package:bentzip/screens/auth_screen.dart';
 import 'package:bentzip/screens/home_screen.dart';
+import 'package:bentzip/utils/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -29,6 +30,7 @@ class _SplashScreenState extends State<SplashScreen> {
           (route) => false);
       return;
     }
+    Api.token = token;
     Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const HomeScreen()),
         (route) => false);
