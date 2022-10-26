@@ -1,7 +1,11 @@
-import 'package:bentzip/screens/add_school.dart';
+import 'package:bentzip/models/user.dart';
+import 'package:bentzip/screens/add_class.dart';
+import 'package:bentzip/screens/add_student.dart';
+import 'package:bentzip/screens/add_teacher.dart';
 import 'package:bentzip/screens/dashboard_screen.dart';
 import 'package:bentzip/states/connection_state.dart';
 import 'package:bentzip/states/nav_state.dart';
+import 'package:bentzip/states/user.dart';
 import 'package:bentzip/utils/constants.dart';
 import 'package:bentzip/utils/responsive.dart';
 import 'package:bentzip/widgets/drawer.dart';
@@ -9,6 +13,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'attendance_screen.dart';
 import 'payment_screen.dart';
 import 'report_screen.dart';
 import 'support_screen.dart';
@@ -23,11 +28,13 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final pageController = PageController();
   ScaffoldFeatureController? connectionBar;
-  String currentTitle = sideNav[0].title;
+  String currentTitle = adminSideNav[0].title;
   int last = 0;
+  late User user;
 
   @override
   void initState() {
+    user = context.read<UserState>().state!;
     Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
       if (result == ConnectivityResult.mobile ||
           result == ConnectivityResult.wifi ||
@@ -59,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: BlocBuilder<NavState, int>(builder: (blocContext, navState) {
         if (navState != -1) {
           last = navState;
-          currentTitle = sideNav[navState].title;
+          currentTitle = adminSideNav[navState].title;
         }
         return Scaffold(
           resizeToAvoidBottomInset: false,
@@ -165,7 +172,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               controller: pageController,
                               children: const [
                                 DashBoardScreen(),
-                                AddSchool(),
+                                AddTeacher(),
+                                AddStudent(),
+                                AddClass(),
+                                AttendanceScreen(),
                                 PaymentScreen(),
                                 SupportScreen(),
                                 ReportScreen(),

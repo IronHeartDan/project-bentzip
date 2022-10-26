@@ -1,7 +1,25 @@
 const mongoose = require("mongoose");
 
-const User = mongoose.model(
-  "User",
+const gaurdian = mongoose.Schema({
+  name: {
+    type: String,
+    trim: true,
+    required: true,
+  },
+  contact: {
+    type: Number,
+    trim: true,
+    required: true,
+  },
+  address: {
+    type: String,
+    trim: true,
+    required: true,
+  },
+},{ _id : false });
+
+const Student = mongoose.model(
+  "Student",
   new mongoose.Schema({
     _id: {
       type: Number,
@@ -33,6 +51,12 @@ const User = mongoose.model(
       type: Date,
       required: true,
     },
+    gaurdian: {
+      type: [gaurdian],
+      trim: true,
+      required: true,
+      validate: [(data) => { return data.length > 0 }, "Gaurdian Required"],
+    },
     school: {
       type: String,
       trim: true,
@@ -50,9 +74,10 @@ const User = mongoose.model(
       type: [Number],
       trim: true,
       required: true,
+      validate: [(data) => { return data.length > 0 }, "Contact Required"],
     },
   }),
   "users"
 );
 
-module.exports = User;
+module.exports = Student;

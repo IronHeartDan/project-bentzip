@@ -1,14 +1,16 @@
 import 'dart:convert';
 
-import 'package:bentzip/utils/api.dart';
+import 'package:bentzip/models/user.dart';
 import 'package:bentzip/utils/constants.dart';
 import 'package:bentzip/utils/responsive.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:http/http.dart' as http;
 
+import '../states/user.dart';
 import 'home_screen.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -36,17 +38,41 @@ class _AuthScreenState extends State<AuthScreen> {
     };
 
     var header = {"Content-Type": "application/json"};
-    var res = await http.post(Uri.parse("$serverURL/login"),
-        headers: header, body: jsonEncode(body));
+    http.Response res;
+    try {
+      res = await http
+          .post(Uri.parse("$serverURL/login"),
+              headers: header, body: jsonEncode(body))
+          .timeout(onTimeout: () {
+        return http.Response('Timeout', 408);
+      }, const Duration(seconds: 5));
+    } on http.ClientException catch (e) {
+      setState(() {
+        loading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.message),
+        backgroundColor: Colors.red,
+      ));
+      return;
+    }
 
     setState(() {
       loading = false;
     });
 
-    if (res.statusCode == 200) {
-      await secureStorage.write(key: "client-auth-token", value: res.body);
+    if (res.statusCode == 408) {
       if (!mounted) return;
-      Api.token = res.body;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Request Timeout"),
+        backgroundColor: Colors.red,
+      ));
+    }
+
+    if (res.statusCode == 200) {
+      await secureStorage.write(key: "user", value: res.body);
+      if (!mounted) return;
+      context.read<UserState>().setUser(User.fromJson(jsonDecode(res.body)));
       Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const HomeScreen()),
           (route) => false);
@@ -55,8 +81,6 @@ class _AuthScreenState extends State<AuthScreen> {
 
     if (res.statusCode == 400) {
       var resBody = jsonDecode(res.body);
-      print(resBody);
-
       if (!mounted) return;
       if (resBody["id"] == -1) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(

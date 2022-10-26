@@ -15,7 +15,7 @@ final yellow = HexColor("#FCC43E");
 final green = HexColor("#219653");
 final red = HexColor("#F90706");
 
-final sideNav = [
+final adminSideNav = [
   MenuModel(Icons.dashboard, "Dashboard"),
   MenuModel(Icons.add_box_outlined, "Add Teacher"),
   MenuModel(Icons.add_box_outlined, "Add Student"),
@@ -24,6 +24,17 @@ final sideNav = [
   MenuModel(Icons.add_box_outlined, "Notices"),
   MenuModel(Icons.add_box_outlined, "Leave Approval"),
   MenuModel(Icons.add_box_outlined, "Fee Management"),
+  MenuModel(Icons.power_settings_new, "Sign Out")
+];
+
+final teacherSideNav = [
+  MenuModel(Icons.dashboard, "Dashboard"),
+  MenuModel(Icons.add_box_outlined, "Attendance"),
+  MenuModel(Icons.add_box_outlined, "Leave Approval"),
+  MenuModel(Icons.power_settings_new, "Sign Out")
+];
+
+final studentSideNav = [
   MenuModel(Icons.power_settings_new, "Sign Out")
 ];
 

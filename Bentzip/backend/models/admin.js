@@ -13,6 +13,11 @@ const Admin = mongoose.model(
             required: true,
             trim: true,
         },
+        school: {
+            type: String,
+            trim: true,
+            required: true,
+        },
         role: {
             type: Number,
             required: true,

@@ -17,7 +17,8 @@ const PORT = process.env.PORT || 3001;
 
 // Models Import
 const Admin = require("./models/admin");
-const User = require("./models/user");
+const Teacher = require("./models/teacher");
+const Student = require("./models/student");
 const Class = require("./models/class");
 const Counter = require("./models/counter");
 
@@ -85,10 +86,11 @@ async function startServer() {
   app.post("/addTeacher", verify, async (req, res) => {
     let body = req.body;
     if (checkBody(body)) {
-      let match = await User.findOne({ email: body.email });
-      if (match) return res.status(400).send({ email: -1 });
       let session = await mongoose.startSession();
       try {
+        let collection = mongoose.connection.db.collection("users");
+        let match = await collection.findOne({ email: body.email });
+        if (match) return res.status(400).send({ email: -1 });
         await session.withTransaction(async () => {
           // Increment School Teacher Count
           let count = await Counter.findByIdAndUpdate(
@@ -108,7 +110,7 @@ async function startServer() {
 
           // Save Teacher
           body._id = id;
-          let user = new User(body);
+          let user = new Teacher(body);
           await user.save({ session: session });
 
           // Commit Transaction
@@ -118,7 +120,6 @@ async function startServer() {
           res.status(200).send("OK");
         });
       } catch (error) {
-        console.log(error);
         res.status(400).send(error);
       } finally {
         await session.endSession();
@@ -135,7 +136,8 @@ async function startServer() {
   app.post("/addStudent", verify, async (req, res) => {
     let body = req.body;
     if (checkBody(body)) {
-      let match = await User.findOne({ email: body.email });
+      let collection = mongoose.connection.db.collection("users");
+      let match = await collection.findOne({ email: body.email });
       if (match) return res.status(400).send({ email: -1 });
       let session = await mongoose.startSession();
       try {
@@ -158,7 +160,7 @@ async function startServer() {
 
           // Save Student
           body._id = id;
-          let user = new User(body);
+          let user = new Student(body);
           await user.save({ session: session });
 
           // Commit Transaction

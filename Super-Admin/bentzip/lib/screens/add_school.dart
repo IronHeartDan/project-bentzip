@@ -92,12 +92,14 @@ class _AddSchoolState extends State<AddSchool>
                 : const FittedBox(),
             Expanded(
                 child: Card(
+                  margin: Responsive.isSmall(context) ? const EdgeInsets.all(0) : null,
               clipBehavior: Clip.hardEdge,
               elevation: 0,
               shape: !Responsive.isSmall(context)
                   ? const RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(20)))
-                  : null,
+                  : const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(0))),
               child: BlocListener<NavState, int>(
                 listener: (blocContext, navState) {
                   if (navState == 1) {

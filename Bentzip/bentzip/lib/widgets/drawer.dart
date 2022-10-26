@@ -1,5 +1,7 @@
+import 'package:bentzip/models/user.dart';
 import 'package:bentzip/screens/auth_screen.dart';
 import 'package:bentzip/states/nav_state.dart';
+import 'package:bentzip/states/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -22,9 +24,17 @@ class CustomDrawer extends StatefulWidget {
 class _CustomDrawerState extends State<CustomDrawer> {
   late int selected;
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
+  late User user;
+  late int length;
 
   @override
   void initState() {
+    user = context.read<UserState>().state!;
+    length = user.role == 0
+        ? adminSideNav.length
+        : user.role == 1
+            ? teacherSideNav.length
+            : studentSideNav.length;
     selected = widget.prev;
     super.initState();
   }
@@ -40,27 +50,34 @@ class _CustomDrawerState extends State<CustomDrawer> {
           children: [
             Expanded(
               child: ListView.builder(
-                  itemCount: sideNav.length,
+                  itemCount: length,
                   itemBuilder: (context, index) {
-                    MenuModel menu = sideNav[index];
+                    MenuModel menu = user.role == 0
+                        ? adminSideNav[index]
+                        : user.role == 1
+                            ? teacherSideNav[index]
+                            : studentSideNav[index];
                     return Container(
                       margin: const EdgeInsets.only(top: 30),
-                      padding: const EdgeInsets.only(left: 46),
+                      padding: EdgeInsets.only(
+                          left: 46, bottom: index == length - 1 ? 30 : 0),
                       child: ListTile(
-                        onTap: () {
-                          if (index == sideNav.length - 1) {
-                            secureStorage.delete(key: "client-auth-token");
-                            Navigator.of(context).pushAndRemoveUntil(
-                                MaterialPageRoute(
-                                    builder: (context) => const AuthScreen()),
-                                (route) => false);
-                            return;
-                          }
-                          context.read<NavState>().setNav(index);
-                          if (widget.hide) {
-                            Navigator.of(context).pop();
-                          }
-                        },
+                        onTap: index == length - 1
+                            ? () async {
+                                await secureStorage.delete(key: "user");
+                                if(!mounted) return;
+                                Navigator.of(context).pushAndRemoveUntil(
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const AuthScreen()),
+                                    (route) => false);
+                              }
+                            : () {
+                                context.read<NavState>().setNav(index);
+                                if (widget.hide) {
+                                  Navigator.of(context).pop();
+                                }
+                              },
                         horizontalTitleGap: 0,
                         tileColor: Colors.transparent,
                         iconColor: secondaryColor,

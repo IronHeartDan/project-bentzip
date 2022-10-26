@@ -1,7 +1,12 @@
+import 'dart:convert';
+
+import 'package:bentzip/models/user.dart';
 import 'package:bentzip/screens/auth_screen.dart';
 import 'package:bentzip/screens/home_screen.dart';
+import 'package:bentzip/states/user.dart';
 import 'package:bentzip/utils/api.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -22,15 +27,18 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future splash() async {
     await Future.delayed(const Duration(seconds: 2));
-    var token = await secureStorage.read(key: "client-auth-token");
+    var check = await secureStorage.read(key: "user");
+    print(check);
     if (!mounted) return;
-    if (token == null) {
+    if (check == null) {
       Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const AuthScreen()),
-          (route) => false);
+              (route) => false);
       return;
     }
-    Api.token = token;
+
+    var client = jsonDecode(check);
+    context.read<UserState>().setUser(User.fromJson(client));
     Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const HomeScreen()),
         (route) => false);

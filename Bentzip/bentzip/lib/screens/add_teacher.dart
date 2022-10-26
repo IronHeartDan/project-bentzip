@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:bentzip/screens/add_school_form.dart';
+import 'package:bentzip/screens/add_teacher_form.dart';
 import 'package:bentzip/screens/schools_table.dart';
 import 'package:bentzip/utils/constants.dart';
 import 'package:bentzip/utils/responsive.dart';
@@ -11,14 +11,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../states/nav_state.dart';
 
-class AddSchool extends StatefulWidget {
-  const AddSchool({Key? key}) : super(key: key);
+class AddTeacher extends StatefulWidget {
+  const AddTeacher({Key? key}) : super(key: key);
 
   @override
-  State<AddSchool> createState() => _AddSchoolState();
+  State<AddTeacher> createState() => _AddTeacherState();
 }
 
-class _AddSchoolState extends State<AddSchool>
+class _AddTeacherState extends State<AddTeacher>
     with AutomaticKeepAliveClientMixin {
   final _navController = PageController();
   double currentNav = 0;
@@ -73,7 +73,7 @@ class _AddSchoolState extends State<AddSchool>
                       Visibility(
                         visible: currentNav == 0,
                         child: PrimaryButton(
-                          text: "Add School",
+                          text: "Add Teacher",
                           onPress: () {
                             context.read<NavState>().setNav(-1);
                             _navController.animateToPage(1,
@@ -92,12 +92,14 @@ class _AddSchoolState extends State<AddSchool>
                 : const FittedBox(),
             Expanded(
                 child: Card(
+                  margin: const EdgeInsets.all(0),
               clipBehavior: Clip.hardEdge,
               elevation: 0,
               shape: !Responsive.isSmall(context)
                   ? const RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(20)))
-                  : null,
+                  : const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(0))),
               child: BlocListener<NavState, int>(
                 listener: (blocContext, navState) {
                   if (navState == 1) {
@@ -110,7 +112,7 @@ class _AddSchoolState extends State<AddSchool>
                   physics: const NeverScrollableScrollPhysics(),
                   children:  [
                     const SchoolsTable(),
-                    AddSchoolForm(handleNav: _handleNav),
+                    AddTeacherForm(handleNav: _handleNav),
                   ],
                 ),
               ),
