@@ -1,15 +1,22 @@
+import 'dart:convert';
+
 import 'package:bentzip/models/school.dart';
+import 'package:bentzip/utils/api.dart';
 import 'package:bentzip/utils/constants.dart';
 import 'package:country_state_city/country_state_city.dart' as csc;
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
+import '../states/user.dart';
 import '../utils/responsive.dart';
 import '../widgets/form_input.dart';
 import '../widgets/form_label.dart';
 import '../widgets/primary_buttton.dart';
+
+import 'package:http/http.dart' as http;
 
 class AddStudentForm extends StatefulWidget {
   final Function handleNav;
@@ -34,7 +41,30 @@ class _AddStudentFormState extends State<AddStudentForm> {
   @override
   void initState() {
     super.initState();
+    getClasses();
     getStates();
+  }
+
+
+   Future getClasses() async{
+    var header = {
+      "Content-Type": "application/json",
+      "Authorization": context.read<UserState>().state!.token,
+    };
+
+    var res = await http.get(Uri.parse("$serverURL/${context.read<UserState>().state!.school}/getClasses"),headers: header);
+    if(res.statusCode == 400) return;
+    var resBody = jsonDecode(res.body);
+    if(resBody.isEmpty){
+      widget.handleNav();
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(
+        backgroundColor: Colors.red,
+        content: Text("Please Add Classes"),
+        duration: Duration(seconds: 5),
+      ));
+    }
+
   }
 
   Future getStates() async {

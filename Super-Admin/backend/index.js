@@ -125,6 +125,7 @@ async function startServer() {
           res.status(200).send("OK");
         });
       } catch (error) {
+        console.log(error);
         res.status(400).send(error);
       } finally {
         await session.endSession();

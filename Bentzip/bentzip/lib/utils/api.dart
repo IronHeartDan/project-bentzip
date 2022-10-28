@@ -1,6 +1,8 @@
 import 'dart:convert';
 
+import 'package:bentzip/states/user.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 
@@ -43,7 +45,7 @@ class Api {
     var body = jsonEncode(school.toJson());
     var header = {
       "Content-Type": "application/json",
-      "auth-token": token,
+      "Authorization": token,
     };
     var res = await http.post(Uri.parse("$serverURL/addSchool"),
         headers: header, body: body);

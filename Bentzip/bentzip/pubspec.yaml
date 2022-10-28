@@ -46,6 +46,7 @@ dependencies:
   intl: ^0.17.0
   flutter_secure_storage: ^6.0.0
   sliver_tools: ^0.2.8
+  data_tables: ^1.4.0
 
 dev_dependencies:
   flutter_test:

@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:bentzip/screens/add_student_form.dart';
 import 'package:bentzip/screens/add_teacher_form.dart';
 import 'package:bentzip/screens/schools_table.dart';
 import 'package:bentzip/utils/constants.dart';
@@ -23,21 +24,13 @@ class _AddStudentState extends State<AddStudent>
   final _navController = PageController();
   double currentNav = 0;
 
-  @override
-  void initState() {
-    _navController.addListener(() {
-      setState(() {
-        if (_navController.page != null) {
-          currentNav = _navController.page!;
-        }
-      });
-    });
-    super.initState();
-  }
 
   Future _handleNav() async {
     if (currentNav == 1) {
-      context.read<NavState>().setNav(2);
+      setState(() {
+        currentNav = 0;
+      });
+      context.read<NavState>().setNav(3);
       _navController.animateToPage(0,
           duration: const Duration(milliseconds: 200), curve: Curves.ease);
     } else {
@@ -75,6 +68,9 @@ class _AddStudentState extends State<AddStudent>
                   child: PrimaryButton(
                     text: "Add Student",
                     onPress: () {
+                      setState(() {
+                        currentNav = 1;
+                      });
                       context.read<NavState>().setNav(-1);
                       _navController.animateToPage(1,
                           duration: const Duration(milliseconds: 200),
@@ -102,7 +98,7 @@ class _AddStudentState extends State<AddStudent>
                       borderRadius: BorderRadius.all(Radius.circular(0))),
                   child: BlocListener<NavState, int>(
                     listener: (blocContext, navState) {
-                      if (navState == 2) {
+                      if (navState == 3) {
                         _navController.animateToPage(0,
                             duration: const Duration(milliseconds: 200), curve: Curves.ease);
                       }
@@ -112,7 +108,7 @@ class _AddStudentState extends State<AddStudent>
                       physics: const NeverScrollableScrollPhysics(),
                       children:  [
                         const SchoolsTable(),
-                        AddTeacherForm(handleNav: _handleNav),
+                        AddStudentForm(handleNav: _handleNav),
                       ],
                     ),
                   ),
@@ -126,6 +122,9 @@ class _AddStudentState extends State<AddStudent>
           child: FloatingActionButton(
             backgroundColor: primaryDarkColor,
             onPressed: () {
+              setState(() {
+                currentNav = 1;
+              });
               context.read<NavState>().setNav(-1);
               _navController.animateToPage(1,
                   duration: const Duration(milliseconds: 200),

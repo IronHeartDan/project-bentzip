@@ -5,8 +5,8 @@ const express = require("express");
 const { default: mongoose } = require("mongoose");
 const DB = require("./mongoose/database");
 const dotenv = require("dotenv");
-const verify = require("./authVerify");
 const jwt = require("jsonwebtoken");
+const { checkBody, verifyAuth, checkSchool } = require("./util");
 
 
 // Configs
@@ -16,6 +16,7 @@ const server = require("http").createServer(app);
 const PORT = process.env.PORT || 3001;
 
 // Models Import
+const School = require("./models/school");
 const Admin = require("./models/admin");
 const Teacher = require("./models/teacher");
 const Student = require("./models/student");
@@ -32,7 +33,6 @@ DB.connectDB()
 // Start Server
 
 async function startServer() {
-
   // Config Env
   dotenv.config();
 
@@ -56,6 +56,7 @@ async function startServer() {
       }, process.env.JSON_SECRET);
       res.status(200).send({
         token: token,
+        school:user.school,
         role: user.role,
       });
 
@@ -64,16 +65,22 @@ async function startServer() {
     }
   });
 
+  // Class
+
   // Add Class
-  app.post("/addClass", async (req, res) => {
-    if (checkBody(req.body)) {
+  app.post("/addClass", verifyAuth, async (req, res) => {
+    let body = req.body;
+    if (checkBody(body)) {
       try {
+        await Class.ensureIndexes();
+        // School Check
+        if (await checkSchool(body.school)) return res.status(400).send("School not found");
         // Save Class
-        let model = new Class(req.body);
+        let model = new Class(body);
         await model.save();
         res.status(200).send();
       } catch (error) {
-        res.status(500).send(error);
+        res.status(400).send(error);
         console.error(error);
       }
     } else {
@@ -82,10 +89,24 @@ async function startServer() {
   });
   // Add Class
 
+  // Get School Classes
+  app.get("/:school/getClasses", verifyAuth, async (req, res) => {
+    try {
+      // School Check
+      if (await checkSchool(req.params.school)) return res.status(400).send("School not found");
+      let classes = await Class.find({ school: req.params.school });
+      res.status(200).send(classes);
+    } catch (error) {
+      res.status(400).send(error);
+    }
+  });
+
   // Add Teacher
-  app.post("/addTeacher", verify, async (req, res) => {
+  app.post("/addTeacher", verifyAuth, async (req, res) => {
     let body = req.body;
     if (checkBody(body)) {
+      // School Check
+      if (await checkSchool(body.school)) return res.status(400).send("School not found");
       let session = await mongoose.startSession();
       try {
         let collection = mongoose.connection.db.collection("users");
@@ -133,9 +154,11 @@ async function startServer() {
 
 
   // Add Student
-  app.post("/addStudent", verify, async (req, res) => {
+  app.post("/addStudent", verifyAuth, async (req, res) => {
     let body = req.body;
     if (checkBody(body)) {
+      // School Check
+      if (await checkSchool(body.school)) return res.status(400).send("School not found");
       let collection = mongoose.connection.db.collection("users");
       let match = await collection.findOne({ email: body.email });
       if (match) return res.status(400).send({ email: -1 });
@@ -186,13 +209,4 @@ async function startServer() {
   server.listen(PORT, () => {
     console.log(`Bentzip Server Running On Port ${PORT}`);
   });
-}
-
-function checkBody(body) {
-  let isEmpty = Object.keys(body).length == 0;
-  if (body && !isEmpty) {
-    return true;
-  } else {
-    return false;
-  }
 }

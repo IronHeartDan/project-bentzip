@@ -172,9 +172,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               controller: pageController,
                               children: const [
                                 DashBoardScreen(),
+                                AddClass(),
                                 AddTeacher(),
                                 AddStudent(),
-                                AddClass(),
                                 AttendanceScreen(),
                                 PaymentScreen(),
                                 SupportScreen(),

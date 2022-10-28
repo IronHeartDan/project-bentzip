@@ -37,7 +37,7 @@ class _AddTeacherState extends State<AddTeacher>
 
   Future _handleNav() async {
     if (currentNav == 1) {
-      context.read<NavState>().setNav(1);
+      context.read<NavState>().setNav(2);
       _navController.animateToPage(0,
           duration: const Duration(milliseconds: 200), curve: Curves.ease);
     } else {
@@ -102,7 +102,7 @@ class _AddTeacherState extends State<AddTeacher>
                   borderRadius: BorderRadius.all(Radius.circular(0))),
               child: BlocListener<NavState, int>(
                 listener: (blocContext, navState) {
-                  if (navState == 1) {
+                  if (navState == 2) {
                     _navController.animateToPage(0,
                         duration: const Duration(milliseconds: 200), curve: Curves.ease);
                   }
