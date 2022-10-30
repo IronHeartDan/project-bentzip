@@ -94,7 +94,35 @@ async function startServer() {
     try {
       // School Check
       if (await checkSchool(req.params.school)) return res.status(400).send("School not found");
-      let classes = await Class.find({ school: req.params.school });
+      // let classes = await Class.find({ school: req.params.school });
+      let classes = await Class.aggregate([
+        {
+          '$match': {
+            'school': `${req.params.school}`
+          }
+        }, {
+          '$group': {
+            '_id': {
+              'standard': '$standard'
+            }, 
+            'classes': {
+              '$push': {
+                '_id': '$_id', 
+                'section': '$section'
+              }
+            }
+          }
+        }, {
+          '$replaceWith': {
+            'standard': '$_id.standard', 
+            'classes': '$classes'
+          }
+        }, {
+          '$sort': {
+            'standard': 1
+          }
+        }
+      ]);
       res.status(200).send(classes);
     } catch (error) {
       res.status(400).send(error);

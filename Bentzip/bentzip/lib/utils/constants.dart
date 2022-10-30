@@ -17,9 +17,9 @@ final red = HexColor("#F90706");
 
 final adminSideNav = [
   MenuModel(Icons.dashboard, "Dashboard"),
-  MenuModel(Icons.add_box_outlined, "Add Class"),
-  MenuModel(Icons.add_box_outlined, "Add Teacher"),
-  MenuModel(Icons.add_box_outlined, "Add Student"),
+  MenuModel(Icons.add_box_outlined, "Classes"),
+  MenuModel(Icons.add_box_outlined, "Teachers"),
+  MenuModel(Icons.add_box_outlined, "Students"),
   MenuModel(Icons.add_box_outlined, "Attendance"),
   MenuModel(Icons.add_box_outlined, "Notices"),
   MenuModel(Icons.add_box_outlined, "Leave Approval"),
