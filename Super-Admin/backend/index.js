@@ -122,7 +122,7 @@ async function startServer() {
           await session.commitTransaction();
 
           // Return
-          res.status(200).send("OK");
+          res.status(200).send(id);
         });
       } catch (error) {
         console.log(error);

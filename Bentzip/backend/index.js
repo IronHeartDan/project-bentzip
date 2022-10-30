@@ -6,11 +6,13 @@ const { default: mongoose } = require("mongoose");
 const DB = require("./mongoose/database");
 const dotenv = require("dotenv");
 const jwt = require("jsonwebtoken");
+const cors = require("cors");
 const { checkBody, verifyAuth, checkSchool } = require("./util");
 
 
 // Configs
 const app = express();
+app.use(cors());
 app.use(express.json());
 const server = require("http").createServer(app);
 const PORT = process.env.PORT || 3001;
@@ -56,7 +58,7 @@ async function startServer() {
       }, process.env.JSON_SECRET);
       res.status(200).send({
         token: token,
-        school:user.school,
+        school: user.school,
         role: user.role,
       });
 
@@ -104,17 +106,17 @@ async function startServer() {
           '$group': {
             '_id': {
               'standard': '$standard'
-            }, 
+            },
             'classes': {
               '$push': {
-                '_id': '$_id', 
+                '_id': '$_id',
                 'section': '$section'
               }
             }
           }
         }, {
           '$replaceWith': {
-            'standard': '$_id.standard', 
+            'standard': '$_id.standard',
             'classes': '$classes'
           }
         }, {
@@ -128,6 +130,10 @@ async function startServer() {
       res.status(400).send(error);
     }
   });
+
+  // End Class
+
+  // Teacher 
 
   // Add Teacher
   app.post("/addTeacher", verifyAuth, async (req, res) => {
@@ -166,7 +172,7 @@ async function startServer() {
           await session.commitTransaction();
 
           // Return
-          res.status(200).send("OK");
+          res.status(200).send(id);
         });
       } catch (error) {
         res.status(400).send(error);
@@ -179,6 +185,34 @@ async function startServer() {
   });
 
   // End Of Add Teacher
+
+  // Get Teachers
+  app.get("/:school/getTeachers", verifyAuth, async (req, res) => {
+    try {
+      // School Check
+      if (await checkSchool(req.params.school)) return res.status(400).send("School not found");
+      // let classes = await Class.find({ school: req.params.school });
+      let teachers = await Teacher.aggregate([
+        {
+          '$match': {
+            'school': `${req.params.school}`,
+            'role': 1
+          }
+        }, {
+          '$sort': {
+            'name': 1
+          }
+        }
+      ]);
+      res.status(200).send(teachers);
+    } catch (error) {
+      res.status(400).send(error);
+    }
+  });
+
+  // Get Teachers
+
+  // End Teacher
 
 
   // Add Student
@@ -218,7 +252,7 @@ async function startServer() {
           await session.commitTransaction();
 
           // Return
-          res.status(200).send("OK");
+          res.status(200).send(id);
         });
       } catch (error) {
         console.log(error);

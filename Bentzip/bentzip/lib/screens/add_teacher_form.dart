@@ -1,10 +1,16 @@
+import 'dart:convert';
+
 import 'package:bentzip/models/school.dart';
+import 'package:bentzip/models/user.dart';
+import 'package:bentzip/states/user.dart';
 import 'package:bentzip/utils/constants.dart';
 import 'package:country_state_city/country_state_city.dart' as csc;
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:sliver_tools/sliver_tools.dart';
+import 'package:http/http.dart' as http;
 
 import '../utils/responsive.dart';
 import '../widgets/form_input.dart';
@@ -29,10 +35,21 @@ class _AddTeacherFormState extends State<AddTeacherForm> {
 
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _editingControllerDoi = TextEditingController();
-  final School _school = School();
+  final TextEditingController _editingControllerPass = TextEditingController();
+  final TextEditingController _editingControllerStart = TextEditingController();
+  final TextEditingController _editingControllerEnd = TextEditingController();
+  final Map<String, dynamic> input = {};
+
+  late User user;
+  late var header;
 
   @override
   void initState() {
+    user = context.read<UserState>().state!;
+    header = {
+      "Content-Type": "application/json",
+      "Authorization": user.token,
+    };
     super.initState();
     getStates();
   }
@@ -68,6 +85,62 @@ class _AddTeacherFormState extends State<AddTeacherForm> {
         const DropdownMenuItem<String>(value: "0", child: Text("Select City")));
     currentCity = "0";
     setState(() {});
+  }
+
+  Future _addTeacher() async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (buildContext) {
+          return AlertDialog(
+            backgroundColor: primaryColor,
+            content: SizedBox(
+                width: 150,
+                height: 150,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const CircularProgressIndicator(
+                      color: Colors.white,
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Text(
+                      "Adding Class Section",
+                      style: GoogleFonts.poppins(
+                          color: Colors.white),
+                    ),
+                  ],
+                )),
+          );
+        });
+    var res = await http.post(Uri.parse("$serverURL/addTeacher"),
+        headers: header, body: jsonEncode(input));
+
+    navBack();
+
+    if (res.statusCode == 400) {
+      showSnack(res.body, true);
+      return;
+    }
+
+    if(res.statusCode == 200){
+      showSnack("Teacher Added", false);
+    }
+
+  }
+
+  void navBack() {
+    Navigator.of(context).pop();
+  }
+
+  void showSnack(String msg, bool error) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      backgroundColor: error ? Colors.red : Colors.green,
+      content: Text(msg),
+      duration: const Duration(seconds: 5),
+    ));
   }
 
   @override
@@ -158,7 +231,7 @@ class _AddTeacherFormState extends State<AddTeacherForm> {
                                       FormInput(
                                         textInputAction: TextInputAction.next,
                                         onSaved: (val) {
-                                          _school.name = val;
+                                          input["name"] = val;
                                         },
                                         validator: (val) {
                                           if (val == null || val.isEmpty) {
@@ -188,7 +261,7 @@ class _AddTeacherFormState extends State<AddTeacherForm> {
                                       FormInput(
                                         textInputAction: TextInputAction.next,
                                         onSaved: (val) {
-                                          _school.name = val;
+                                          input["name"] += " $val";
                                         },
                                         validator: (val) {
                                           if (val == null || val.isEmpty) {
@@ -227,7 +300,7 @@ class _AddTeacherFormState extends State<AddTeacherForm> {
                                 FormInput(
                                   textInputAction: TextInputAction.next,
                                   onSaved: (val) {
-                                    _school.name = val;
+                                    input["email"] = val;
                                   },
                                   validator: (val) {
                                     if (val == null || val.isEmpty) {
@@ -256,7 +329,7 @@ class _AddTeacherFormState extends State<AddTeacherForm> {
                                 FormInput(
                                   textInputAction: TextInputAction.next,
                                   onSaved: (val) {
-                                    _school.name = val;
+                                    input["contact"] = [val];
                                   },
                                   validator: (val) {
                                     if (val == null || val.isEmpty) {
@@ -291,7 +364,7 @@ class _AddTeacherFormState extends State<AddTeacherForm> {
                                 ),
                                 FormInput(
                                   onSaved: (val) {
-                                    _school.name = val;
+                                    input["address"] = val;
                                   },
                                   validator: (val) {
                                     if (val == null || val.isEmpty) {
@@ -318,17 +391,20 @@ class _AddTeacherFormState extends State<AddTeacherForm> {
                                 ),
                                 FormInput(
                                   textInputAction: TextInputAction.next,
+                                  textEditingController: _editingControllerDoi,
+                                  onSaved: (val) {
+                                    input["dob"] = val;
+                                  },
                                   onTap: () async {
-                                    await showDatePicker(
+                                    var doi = await showDatePicker(
                                         context: context,
                                         initialDate: DateTime.now(),
                                         firstDate: DateTime(1900),
                                         lastDate: DateTime.now());
-                                    // if (doi != null) {
-                                    //   _editingControllerDoi.text =
-                                    //       DateFormat("yyyy-MM-dd")
-                                    //           .format(doi);
-                                    // }
+                                    if (doi != null) {
+                                      _editingControllerDoi.text =
+                                          DateFormat("yyyy-MM-dd").format(doi);
+                                    }
                                   },
                                   validator: (val) {
                                     if (val == null || val.isEmpty) {
@@ -356,13 +432,23 @@ class _AddTeacherFormState extends State<AddTeacherForm> {
                             flex: Responsive.isSmall(context) ? 0 : 1,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              children: const [
-                                FormLabel(text: "Teacher Password *"),
-                                SizedBox(
+                              children: [
+                                const FormLabel(text: "Teacher Password *"),
+                                const SizedBox(
                                   height: 16,
                                 ),
                                 FormInput(
+                                  textEditingController: _editingControllerPass,
                                   textInputAction: TextInputAction.next,
+                                  onSaved: (val) {
+                                    input["password"] = val;
+                                  },
+                                  validator: (val) {
+                                    if (val == null || val.isEmpty) {
+                                      return "Required";
+                                    }
+                                    return null;
+                                  },
                                   label: "Create Password",
                                 ),
                               ],
@@ -376,13 +462,24 @@ class _AddTeacherFormState extends State<AddTeacherForm> {
                             flex: Responsive.isSmall(context) ? 0 : 1,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              children: const [
-                                FormLabel(text: "Confirm Password *"),
-                                SizedBox(
+                              children: [
+                                const FormLabel(text: "Confirm Password *"),
+                                const SizedBox(
                                   height: 16,
                                 ),
                                 FormInput(
                                   textInputAction: TextInputAction.done,
+                                  validator: (val) {
+                                    if (val == null || val.isEmpty) {
+                                      return "Required";
+                                    }
+
+                                    if (_editingControllerPass.text != val) {
+                                      return "Password Don't Match";
+                                    }
+
+                                    return null;
+                                  },
                                   label: "Check",
                                 ),
                               ],
@@ -394,11 +491,6 @@ class _AddTeacherFormState extends State<AddTeacherForm> {
                   ),
                 )),
               ]),
-              // const SliverToBoxAdapter(
-              //   child: SizedBox(
-              //     height: 50,
-              //   ),
-              // ),
               MultiSliver(pushPinnedChildren: true, children: [
                 SliverPinnedHeader(
                     child: Container(
@@ -440,7 +532,11 @@ class _AddTeacherFormState extends State<AddTeacherForm> {
                                   FormInput(
                                     textInputAction: TextInputAction.next,
                                     onSaved: (val) {
-                                      _school.name = val;
+                                      input["education"] = [
+                                        {
+                                          "institution": val,
+                                        }
+                                      ];
                                     },
                                     validator: (val) {
                                       if (val == null || val.isEmpty) {
@@ -469,7 +565,8 @@ class _AddTeacherFormState extends State<AddTeacherForm> {
                                   FormInput(
                                     textInputAction: TextInputAction.next,
                                     onSaved: (val) {
-                                      _school.name = val;
+                                      input["education"][0]["qualification"] =
+                                          val;
                                     },
                                     validator: (val) {
                                       if (val == null || val.isEmpty) {
@@ -488,132 +585,178 @@ class _AddTeacherFormState extends State<AddTeacherForm> {
                           height: Responsive.isSmall(context) ? 24 : 30,
                         ),
                         Flex(
-                          direction: MediaQuery.of(context).size.width < 1200
+                          direction: Responsive.isSmall(context)
                               ? Axis.vertical
                               : Axis.horizontal,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Expanded(
-                                flex: MediaQuery.of(context).size.width < 1200
-                                    ? 0
-                                    : 1,
-                                child: Flex(
-                                  direction:
-                                      MediaQuery.of(context).size.width < 1200
-                                          ? Axis.vertical
-                                          : Axis.horizontal,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      flex: MediaQuery.of(context).size.width <
-                                              1200
-                                          ? 0
-                                          : 1,
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          const FormLabel(text: "Start Date *"),
-                                          const SizedBox(
-                                            height: 16,
-                                          ),
-                                          FormInput(
-                                            textInputAction:
-                                                TextInputAction.next,
-                                            textInputType: TextInputType.none,
-                                            textEditingController:
-                                                _editingControllerDoi,
-                                            onSaved: (val) {
-                                              _school.doi = val;
-                                            },
-                                            validator: (val) {
-                                              if (val == null || val.isEmpty) {
-                                                return "Required";
-                                              }
-                                              return null;
-                                            },
-                                            label: DateFormat("yyyy-MM-dd")
-                                                .format(DateTime.now())
-                                                .toString(),
-                                            onTap: () async {
-                                              var doi = await showDatePicker(
-                                                  context: context,
-                                                  initialDate: DateTime.now(),
-                                                  firstDate: DateTime(1900),
-                                                  lastDate: DateTime.now());
-                                              if (doi != null) {
-                                                _editingControllerDoi.text =
-                                                    DateFormat("yyyy-MM-dd")
-                                                        .format(doi);
-                                              }
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width:
-                                          Responsive.isSmall(context) ? 0 : 24,
-                                      height:
-                                          Responsive.isSmall(context) ? 24 : 0,
-                                    ),
-                                    Expanded(
-                                      flex: MediaQuery.of(context).size.width <
-                                              1200
-                                          ? 0
-                                          : 1,
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          const FormLabel(text: "End Date *"),
-                                          const SizedBox(
-                                            height: 16,
-                                          ),
-                                          FormInput(
-                                            textInputAction:
-                                                TextInputAction.next,
-                                            onSaved: (val) {
-                                              _school.id = val;
-                                            },
-                                            validator: (val) {
-                                              if (val == null || val.isEmpty) {
-                                                return "Required";
-                                              }
-                                              return null;
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                )),
-                            SizedBox(
-                              width: Responsive.isSmall(context) ? 0 : 24,
-                              height: Responsive.isSmall(context) ? 24 : 0,
-                            ),
-                            Expanded(
-                              flex: MediaQuery.of(context).size.width < 1200
-                                  ? 0
-                                  : 1,
+                              flex: Responsive.isSmall(context) ? 0 : 1,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const FormLabel(text: "Contact Number *"),
+                                  const FormLabel(text: "Start Date *"),
                                   const SizedBox(
                                     height: 16,
                                   ),
                                   FormInput(
                                     textInputAction: TextInputAction.next,
+                                    textInputType: TextInputType.none,
+                                    textEditingController:
+                                        _editingControllerStart,
                                     onSaved: (val) {
-                                      _school.contact = val;
+                                      input["education"][0]["start"] = val;
                                     },
                                     validator: (val) {
-                                      if (val == null || val.isEmpty)
+                                      if (val == null || val.isEmpty) {
                                         return "Required";
+                                      }
+                                      return null;
+                                    },
+                                    label: DateFormat("yyyy-MM-dd")
+                                        .format(DateTime.now())
+                                        .toString(),
+                                    onTap: () async {
+                                      var start = await showDatePicker(
+                                          context: context,
+                                          initialDate: DateTime.now(),
+                                          firstDate: DateTime(1900),
+                                          lastDate: DateTime.now());
+                                      if (start != null) {
+                                        _editingControllerStart.text =
+                                            DateFormat("yyyy-MM-dd")
+                                                .format(start);
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(
+                              width: Responsive.isSmall(context) ? 0 : 24,
+                              height: Responsive.isSmall(context) ? 24 : 0,
+                            ),
+                            Expanded(
+                              flex: Responsive.isSmall(context) ? 0 : 1,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const FormLabel(text: "End Date *"),
+                                  const SizedBox(
+                                    height: 16,
+                                  ),
+                                  FormInput(
+                                    textEditingController:
+                                        _editingControllerEnd,
+                                    textInputAction: TextInputAction.next,
+                                    onSaved: (val) {
+                                      input["education"][0]["end"] = val;
+                                    },
+                                    onTap: () async {
+                                      var start = await showDatePicker(
+                                          context: context,
+                                          initialDate: DateTime.now(),
+                                          firstDate: DateTime(1900),
+                                          lastDate: DateTime.now());
+                                      if (start != null) {
+                                        _editingControllerEnd.text =
+                                            DateFormat("yyyy-MM-dd")
+                                                .format(start);
+                                      }
+                                    },
+                                    validator: (val) {
+                                      if (val == null || val.isEmpty) {
+                                        return "Required";
+                                      }
                                       return null;
                                     },
                                   ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: Responsive.isSmall(context) ? 24 : 30,
+                        ),
+                        Flex(
+                          direction: Responsive.isSmall(context)
+                              ? Axis.vertical
+                              : Axis.horizontal,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: Responsive.isSmall(context) ? 0 : 1,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const FormLabel(text: "State *"),
+                                  const SizedBox(
+                                    height: 16,
+                                  ),
+                                  DropdownButtonFormField(
+                                      onSaved: (val) {
+                                        input["education"][0]["state"] = val;
+                                      },
+                                      validator: (val) {
+                                        if (val == null || val == "0") {
+                                          return "Required";
+                                        }
+                                        return null;
+                                      },
+                                      isExpanded: true,
+                                      decoration: const InputDecoration(
+                                          label: Text("Select State"),
+                                          border: OutlineInputBorder(
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(5)))),
+                                      value: currentState,
+                                      items: statesList,
+                                      onChanged: (state) {
+                                        setState(() {
+                                          currentState = state as String;
+                                        });
+                                        getCities(state as String);
+                                      }),
+                                ],
+                              ),
+                            ),
+                            SizedBox(
+                              width: Responsive.isSmall(context) ? 0 : 24,
+                              height: Responsive.isSmall(context) ? 24 : 0,
+                            ),
+                            Expanded(
+                              flex: Responsive.isSmall(context) ? 0 : 1,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const FormLabel(text: "City *"),
+                                  const SizedBox(
+                                    height: 16,
+                                  ),
+                                  DropdownButtonFormField(
+                                      onSaved: (val) {
+                                        input["education"][0]["city"] = val;
+                                      },
+                                      validator: (val) {
+                                        if (val == null || val == "0") {
+                                          return "Required";
+                                        }
+                                        return null;
+                                      },
+                                      isExpanded: true,
+                                      decoration: const InputDecoration(
+                                          label: Text("Select City"),
+                                          border: OutlineInputBorder(
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(5)))),
+                                      value: currentCity,
+                                      items: citiesList,
+                                      onChanged: (city) {
+                                        setState(() {
+                                          currentCity = city as String;
+                                        });
+                                      }),
                                 ],
                               ),
                             ),
@@ -647,7 +790,12 @@ class _AddTeacherFormState extends State<AddTeacherForm> {
                               child: PrimaryButton(
                                 text: "Add",
                                 onPress: () async {
-                                  if (_formKey.currentState!.validate()) {}
+                                  if (_formKey.currentState!.validate()) {
+                                    _formKey.currentState!.save();
+                                    input["school"] = user.school;
+                                    input["role"] = 1;
+                                    _addTeacher();
+                                  }
                                 },
                                 icon: Icons.add,
                               ),
