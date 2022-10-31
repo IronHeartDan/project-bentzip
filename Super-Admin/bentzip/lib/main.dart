@@ -1,6 +1,7 @@
 import 'package:bentzip/screens/splash_screen.dart';
 import 'package:bentzip/states/connection_state.dart';
 import 'package:bentzip/states/nav_state.dart';
+import 'package:bentzip/states/token_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -19,6 +20,7 @@ class MyApp extends StatelessWidget {
         BlocProvider<NavState>(create: (context) => NavState()),
         BlocProvider<AppConnectionState>(
             create: (context) => AppConnectionState()),
+        BlocProvider<TokenState>(create: (context) => TokenState(null)),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

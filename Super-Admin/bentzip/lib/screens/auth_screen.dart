@@ -1,14 +1,16 @@
 import 'dart:convert';
 
-import 'package:bentzip/utils/api.dart';
 import 'package:bentzip/utils/constants.dart';
 import 'package:bentzip/utils/responsive.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:http/http.dart' as http;
 
+import '../models/token.dart';
+import '../states/token_state.dart';
 import 'home_screen.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -44,9 +46,9 @@ class _AuthScreenState extends State<AuthScreen> {
     });
 
     if (res.statusCode == 200) {
-      await secureStorage.write(key: "auth-token", value: res.body);
+      await secureStorage.write(key: "token", value: res.body);
       if (!mounted) return;
-      Api.token = res.body;
+      context.read<TokenState>().setUser(Token(res.body));
       Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const HomeScreen()),
           (route) => false);

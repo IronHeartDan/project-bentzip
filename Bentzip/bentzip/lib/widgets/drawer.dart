@@ -1,7 +1,7 @@
 import 'package:bentzip/models/user.dart';
 import 'package:bentzip/screens/auth_screen.dart';
 import 'package:bentzip/states/nav_state.dart';
-import 'package:bentzip/states/user.dart';
+import 'package:bentzip/states/user_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';

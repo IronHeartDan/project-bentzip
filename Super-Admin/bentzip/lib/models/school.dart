@@ -27,5 +27,4 @@ class School{
        "password":password,
      };
    }
-
 }

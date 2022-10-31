@@ -4,13 +4,17 @@ import 'package:bentzip/models/user.dart';
 import 'package:bentzip/utils/constants.dart';
 import 'package:bentzip/utils/responsive.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:http/http.dart' as http;
 
-import '../states/user.dart';
+import '../states/user_state.dart';
+import '../widgets/form_input.dart';
+import '../widgets/form_label.dart';
+import '../widgets/primary_buttton.dart';
 import 'home_screen.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -98,6 +102,53 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
+  Future _resetPassword() async {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(builder: (context,setState,) {
+            bool codeSent = false;
+            return AlertDialog(
+              title: const Text("Password Reset"),
+              content: SizedBox(
+                height: 150,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FormLabel(text: codeSent ? "Enter Code" : "User ID"),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    FormInput(
+                      validator: (val) {},
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Center(
+                      child: PrimaryButton(
+                          text: "Send Code",
+                          onPress: () {
+                            setState(() {
+                              codeSent = true;
+                            });
+                          }),
+                    )
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text("Cancel")),
+              ],
+            );
+          });
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
@@ -170,21 +221,25 @@ class _AuthScreenState extends State<AuthScreen> {
                     const SizedBox(
                       height: 40,
                     ),
-                    Text(
-                      "User Id",
-                      style: GoogleFonts.inter(
-                          fontWeight: FontWeight.w500, color: primaryDarkColor),
-                    ),
+                    const FormLabel(text: "User ID"),
                     const SizedBox(
                       height: 10,
                     ),
                     TextFormField(
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(12),
+                      ],
                       onSaved: (val) {
                         userId = val;
                       },
                       validator: (val) {
                         if (val == null || val.isEmpty) {
-                          return "Email Required";
+                          return "Required";
+                        }
+                        if (val.length != 12) {
+                          return "Invalid";
                         }
                         return null;
                       },
@@ -203,11 +258,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     const SizedBox(
                       height: 20,
                     ),
-                    Text(
-                      "Password",
-                      style: GoogleFonts.inter(
-                          fontWeight: FontWeight.w500, color: primaryDarkColor),
-                    ),
+                    const FormLabel(text: "Password"),
                     const SizedBox(
                       height: 10,
                     ),
@@ -221,6 +272,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         }
                         return null;
                       },
+                      obscureText: true,
                       decoration: InputDecoration(
                           floatingLabelBehavior: FloatingLabelBehavior.never,
                           labelText: "Enter Password",
@@ -280,7 +332,9 @@ class _AuthScreenState extends State<AuthScreen> {
                       height: 20,
                     ),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        _resetPassword();
+                      },
                       child: Text(
                         "Forgot Password ?",
                         style: GoogleFonts.inter(fontWeight: FontWeight.w400),

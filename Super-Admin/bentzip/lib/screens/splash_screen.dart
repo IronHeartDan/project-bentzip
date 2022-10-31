@@ -1,8 +1,11 @@
 import 'package:bentzip/screens/auth_screen.dart';
 import 'package:bentzip/screens/home_screen.dart';
-import 'package:bentzip/utils/api.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+import '../models/token.dart';
+import '../states/token_state.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -22,7 +25,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future splash() async {
     await Future.delayed(const Duration(seconds: 2));
-    var token = await secureStorage.read(key: "auth-token");
+    var token = await secureStorage.read(key: "token");
     if (!mounted) return;
     if (token == null) {
       Navigator.of(context).pushAndRemoveUntil(
@@ -30,7 +33,7 @@ class _SplashScreenState extends State<SplashScreen> {
           (route) => false);
       return;
     }
-    Api.token = token;
+    context.read<TokenState>().setUser(Token(token));
     Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const HomeScreen()),
         (route) => false);

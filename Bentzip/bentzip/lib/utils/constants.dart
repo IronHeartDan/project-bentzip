@@ -15,6 +15,9 @@ final yellow = HexColor("#FCC43E");
 final green = HexColor("#219653");
 final red = HexColor("#F90706");
 
+
+final roles = ["Admin","Teacher","Student"];
+
 final adminSideNav = [
   MenuModel(Icons.dashboard, "Dashboard"),
   MenuModel(Icons.add_box_outlined, "Classes"),

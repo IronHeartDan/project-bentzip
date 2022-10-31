@@ -21,6 +21,7 @@ final sideNav = [
   MenuModel(Icons.payment, "Payment"),
   MenuModel(Icons.airplane_ticket, "Support Ticket"),
   MenuModel(Icons.analytics, "Report"),
+  MenuModel(Icons.power_settings_new, "Sign Out")
 ];
 
 const String serverURL = "http://192.168.1.38:3000";

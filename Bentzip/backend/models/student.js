@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const gaurdian = mongoose.Schema({
+const GuardianSchema = mongoose.Schema({
   name: {
     type: String,
     trim: true,
@@ -51,8 +51,8 @@ const Student = mongoose.model(
       type: Date,
       required: true,
     },
-    gaurdian: {
-      type: [gaurdian],
+    guardian: {
+      type: [GuardianSchema],
       trim: true,
       required: true,
       validate: [(data) => { return data.length > 0 }, "Gaurdian Required"],

@@ -1,7 +1,7 @@
 import 'package:bentzip/screens/splash_screen.dart';
 import 'package:bentzip/states/connection_state.dart';
 import 'package:bentzip/states/nav_state.dart';
-import 'package:bentzip/states/user.dart';
+import 'package:bentzip/states/user_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

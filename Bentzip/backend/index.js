@@ -56,8 +56,10 @@ async function startServer() {
         id: user._id,
         school: user.school
       }, process.env.JSON_SECRET);
+
       res.status(200).send({
         token: token,
+        name:user.name ?? null,
         school: user.school,
         role: user.role,
       });

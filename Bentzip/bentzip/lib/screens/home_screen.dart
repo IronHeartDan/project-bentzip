@@ -5,7 +5,7 @@ import 'package:bentzip/screens/add_teacher.dart';
 import 'package:bentzip/screens/dashboard_screen.dart';
 import 'package:bentzip/states/connection_state.dart';
 import 'package:bentzip/states/nav_state.dart';
-import 'package:bentzip/states/user.dart';
+import 'package:bentzip/states/user_state.dart';
 import 'package:bentzip/utils/constants.dart';
 import 'package:bentzip/utils/responsive.dart';
 import 'package:bentzip/widgets/drawer.dart';
@@ -119,14 +119,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                       Column(
                                         children: [
                                           Text(
-                                            "Super Admin",
+                                            roles[user.role],
                                             style: TextStyle(
                                                 fontSize: 16,
                                                 color: primaryColor,
                                                 fontWeight: FontWeight.w600),
                                           ),
                                           Text(
-                                            "System",
+                                            user.name ?? user.school,
                                             style: TextStyle(
                                                 fontSize: 16,
                                                 color: secondaryTextColor,

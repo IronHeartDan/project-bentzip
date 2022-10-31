@@ -1,9 +1,11 @@
 import 'package:bentzip/states/nav_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hexcolor/hexcolor.dart';
 
 import '../models/MenuModel.dart';
+import '../screens/auth_screen.dart';
 import '../utils/constants.dart';
 
 class CustomDrawer extends StatefulWidget {
@@ -18,6 +20,7 @@ class CustomDrawer extends StatefulWidget {
 }
 
 class _CustomDrawerState extends State<CustomDrawer> {
+  final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   late int selected;
 
   @override
@@ -44,7 +47,17 @@ class _CustomDrawerState extends State<CustomDrawer> {
                       margin: const EdgeInsets.only(top: 30),
                       padding: const EdgeInsets.only(left: 46),
                       child: ListTile(
-                        onTap: () {
+                        onTap: index == sideNav.length - 1
+                            ? () async {
+                          await secureStorage.delete(key: "token");
+                          if(!mounted) return;
+                          Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                  const AuthScreen()),
+                                  (route) => false);
+                        }
+                            : () {
                           context.read<NavState>().setNav(index);
                           if (widget.hide) {
                             Navigator.of(context).pop();

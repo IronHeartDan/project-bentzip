@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:bentzip/models/school.dart';
 import 'package:bentzip/models/user.dart';
-import 'package:bentzip/states/user.dart';
+import 'package:bentzip/states/user_state.dart';
 import 'package:bentzip/utils/constants.dart';
 import 'package:country_state_city/country_state_city.dart' as csc;
 import 'package:flutter/material.dart';
@@ -41,7 +41,7 @@ class _AddTeacherFormState extends State<AddTeacherForm> {
   final Map<String, dynamic> input = {};
 
   late User user;
-  late var header;
+  late Map<String,String>  header;
 
   @override
   void initState() {
@@ -50,8 +50,8 @@ class _AddTeacherFormState extends State<AddTeacherForm> {
       "Content-Type": "application/json",
       "Authorization": user.token,
     };
-    super.initState();
     getStates();
+    super.initState();
   }
 
   Future getStates() async {
@@ -107,7 +107,7 @@ class _AddTeacherFormState extends State<AddTeacherForm> {
                       height: 20,
                     ),
                     Text(
-                      "Adding Class Section",
+                      "Adding Teacher",
                       style: GoogleFonts.poppins(
                           color: Colors.white),
                     ),
@@ -127,6 +127,7 @@ class _AddTeacherFormState extends State<AddTeacherForm> {
 
     if(res.statusCode == 200){
       showSnack("Teacher Added", false);
+      widget.handleNav();
     }
 
   }

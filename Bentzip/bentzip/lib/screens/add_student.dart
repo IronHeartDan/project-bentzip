@@ -99,6 +99,9 @@ class _AddStudentState extends State<AddStudent>
                   child: BlocListener<NavState, int>(
                     listener: (blocContext, navState) {
                       if (navState == 3) {
+                        setState(() {
+                          currentNav = 0;
+                        });
                         _navController.animateToPage(0,
                             duration: const Duration(milliseconds: 200), curve: Curves.ease);
                       }

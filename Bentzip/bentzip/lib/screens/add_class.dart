@@ -14,7 +14,7 @@ import 'package:http/http.dart' as http;
 
 import '../models/user.dart';
 import '../states/nav_state.dart';
-import '../states/user.dart';
+import '../states/user_state.dart';
 import '../widgets/form_input.dart';
 
 class AddClass extends StatefulWidget {
