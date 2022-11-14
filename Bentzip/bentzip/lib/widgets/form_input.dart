@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class FormInput extends StatelessWidget {
   final String? label;
@@ -8,9 +9,21 @@ class FormInput extends StatelessWidget {
   final TextEditingController? textEditingController;
   final TextInputType? textInputType;
   final int? maxLines;
+  final List<TextInputFormatter>? inputFormatters;
   final TextInputAction? textInputAction;
 
-  const FormInput({Key? key, this.label, this.onTap, this.validator, this.textEditingController, this.textInputType, this.textInputAction, this.onSaved, this.maxLines}) : super(key: key);
+  const FormInput(
+      {Key? key,
+      this.label,
+      this.onTap,
+      this.validator,
+      this.textEditingController,
+      this.textInputType,
+      this.textInputAction,
+      this.onSaved,
+      this.maxLines,
+      this.inputFormatters})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -20,10 +33,11 @@ class FormInput extends StatelessWidget {
       validator: validator,
       onSaved: onSaved,
       onTap: onTap,
+      inputFormatters: inputFormatters,
       controller: textEditingController,
       textInputAction: textInputAction,
       decoration: InputDecoration(
-        floatingLabelBehavior: FloatingLabelBehavior.never,
+          floatingLabelBehavior: FloatingLabelBehavior.never,
           label: label != null ? Text(label!) : const Text(""),
           border: const OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(5)))),

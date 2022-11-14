@@ -7,6 +7,7 @@ const DB = require("./mongoose/database");
 const dotenv = require("dotenv");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
+const nodemailer = require("nodemailer");
 const { checkBody, verifyAuth, checkSchool } = require("./util");
 
 
@@ -38,6 +39,15 @@ async function startServer() {
   // Config Env
   dotenv.config();
 
+  // Config Node Mailer
+  let transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.MAIL_ID,
+      pass: process.env.MAIL_PASSWORD,
+    },
+  });
+
   // Base Server Request
   app.get("/", (req, res) => {
     res.status(200).send("Bentzip Server Running");
@@ -59,13 +69,28 @@ async function startServer() {
 
       res.status(200).send({
         token: token,
-        name:user.name ?? null,
+        name: user.name ?? null,
         school: user.school,
         role: user.role,
       });
 
     } else {
       res.status(400).send("Request Body not found");
+    }
+  });
+
+  app.post("/resetPassword", async (req, res) => {
+    try {
+      let mail = await transporter.sendMail({
+        from: process.env.MAIL_ID,
+        to: "danishkhan.dk2.dk16@gmail.com",
+        subject: "Test Mail",
+        text: "Yaay",
+      });
+      console.log(mail.accepted);
+      res.status(200).send(mail);
+    } catch (error) {
+      res.status(400).send(error);
     }
   });
 
@@ -94,15 +119,15 @@ async function startServer() {
   // Add Class
 
   // Get School Classes
-  app.get("/:school/getClasses", verifyAuth, async (req, res) => {
+  app.get("/getClasses", verifyAuth, async (req, res) => {
     try {
       // School Check
-      if (await checkSchool(req.params.school)) return res.status(400).send("School not found");
+      if (await checkSchool(req.query.school)) return res.status(400).send("School not found");
       // let classes = await Class.find({ school: req.params.school });
       let classes = await Class.aggregate([
         {
           '$match': {
-            'school': `${req.params.school}`
+            'school': `${req.query.school}`
           }
         }, {
           '$group': {
@@ -128,6 +153,17 @@ async function startServer() {
         }
       ]);
       res.status(200).send(classes);
+    } catch (error) {
+      res.status(400).send(error);
+    }
+  });
+
+
+  // Get Class
+  app.get("/getClass", verifyAuth, async (req, res) => {
+    try {
+      let schoolClass = await Class.findById(req.query.id);
+      res.status(200).send(schoolClass);
     } catch (error) {
       res.status(400).send(error);
     }
@@ -189,15 +225,15 @@ async function startServer() {
   // End Of Add Teacher
 
   // Get Teachers
-  app.get("/:school/getTeachers", verifyAuth, async (req, res) => {
+  app.get("/getTeachers", verifyAuth, async (req, res) => {
     try {
       // School Check
-      if (await checkSchool(req.params.school)) return res.status(400).send("School not found");
+      if (await checkSchool(req.query.school)) return res.status(400).send("School not found");
       // let classes = await Class.find({ school: req.params.school });
       let teachers = await Teacher.aggregate([
         {
           '$match': {
-            'school': `${req.params.school}`,
+            'school': `${req.query.school}`,
             'role': 1
           }
         }, {
@@ -213,6 +249,19 @@ async function startServer() {
   });
 
   // Get Teachers
+
+
+  // Find Teacher
+  app.get("/getTeacher", verifyAuth, async (req, res) => {
+    try {
+      let teacher = await Teacher.findOne({ _id: req.query.id, school: req.query.school, role: 1 });
+      res.status(200).send(teacher);
+    } catch (error) {
+      res.status(400).send(error);
+    }
+  });
+
+  // End Of Find Teacher
 
   // End Teacher
 
@@ -268,6 +317,37 @@ async function startServer() {
   });
 
   // End Of Add Student
+
+  // Find Student
+  app.get("/getStudent", verifyAuth, async (req, res) => {
+    try {
+      let student = await Student.aggregate([
+        {
+          '$match': {
+            '_id': parseInt(req.query.id),
+            'school': `${req.query.school}`,
+            'role': 2
+          }
+        }, {
+          '$lookup': {
+            'from': 'classes',
+            'localField': 'class',
+            'foreignField': '_id',
+            'as': 'class'
+          }
+        }, {
+          '$unwind': {
+            'path': '$class'
+          }
+        }
+      ]);
+      res.status(200).send(student[0]);
+    } catch (error) {
+      res.status(400).send(error);
+    }
+  });
+
+  // End Of Find Student
 
   // Server Listening
   server.listen(PORT, () => {

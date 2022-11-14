@@ -7,7 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hexcolor/hexcolor.dart';
 
-import '../models/MenuModel.dart';
+import '../models/menu_model.dart';
 import '../utils/constants.dart';
 
 class CustomDrawer extends StatefulWidget {

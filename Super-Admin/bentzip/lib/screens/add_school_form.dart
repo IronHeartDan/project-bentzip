@@ -1,5 +1,7 @@
+import 'dart:convert';
+
 import 'package:bentzip/models/school.dart';
-import 'package:bentzip/utils/api.dart';
+import 'package:bentzip/states/token_state.dart';
 import 'package:bentzip/utils/constants.dart';
 import 'package:bentzip/utils/responsive.dart';
 import 'package:bentzip/widgets/form_input.dart';
@@ -7,7 +9,9 @@ import 'package:bentzip/widgets/form_label.dart';
 import 'package:bentzip/widgets/primary_buttton.dart';
 import 'package:country_state_city/country_state_city.dart' as csc;
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
 class AddSchoolForm extends StatefulWidget {
@@ -31,10 +35,86 @@ class _AddSchoolFormState extends State<AddSchoolForm> {
   final TextEditingController _editingControllerPass = TextEditingController();
   final School _school = School();
 
+  late Map<String, String> header;
+
   @override
   void initState() {
-    super.initState();
+    header = {
+      "Content-Type": "application/json",
+      "Authorization": context.read<TokenState>().state!.token,
+    };
     getStates();
+    super.initState();
+  }
+
+  Future saveSchool(School school) async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (buildContext) {
+          return AlertDialog(
+            backgroundColor: primaryColor,
+            content: SizedBox(
+                width: 150,
+                height: 150,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const CircularProgressIndicator(
+                      color: Colors.white,
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Text(
+                      "Adding School",
+                      style: GoogleFonts.poppins(color: Colors.white),
+                    ),
+                  ],
+                )),
+          );
+        });
+
+    await Future.delayed(const Duration(seconds: 2));
+
+    var body = jsonEncode(school.toJson());
+
+    var res = await http.post(Uri.parse("$serverURL/addSchool"),
+        headers: header, body: body);
+
+    if (res.statusCode == 200) {
+      showSnack("School Added", false);
+      navBack();
+      widget.handleNav();
+      return;
+    }
+
+    var resBody = jsonDecode(res.body);
+
+    if (res.statusCode == 400) {
+      if (resBody["keyPattern"]["_id"] == 1) {
+        showSnack("School Code Already Exists", true);
+      }
+
+      if (resBody["keyPattern"]["email"] == 1) {
+        showSnack("Email Already Exists", true);
+      }
+      return;
+    }
+
+    showSnack("Try Again", true);
+  }
+
+  void navBack() {
+    Navigator.of(context).pop();
+  }
+
+  void showSnack(String msg, bool error) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      backgroundColor: error ? Colors.red : Colors.green,
+      content: Text(msg),
+      duration: const Duration(seconds: 5),
+    ));
   }
 
   Future getStates() async {
@@ -83,9 +163,7 @@ class _AddSchoolFormState extends State<AddSchoolForm> {
           child: Text(
             "School Details",
             style: GoogleFonts.poppins(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w500),
+                color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
           ),
         ),
         Expanded(
@@ -95,7 +173,8 @@ class _AddSchoolFormState extends State<AddSchoolForm> {
             key: _formKey,
             child: Padding(
               padding: !Responsive.isSmall(context)
-                  ? const EdgeInsets.only(left: 40,right: 40,bottom: 40,top: 10)
+                  ? const EdgeInsets.only(
+                      left: 40, right: 40, bottom: 40, top: 10)
                   : const EdgeInsets.all(10),
               child: Column(
                 children: [
@@ -169,14 +248,12 @@ class _AddSchoolFormState extends State<AddSchoolForm> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                          flex: MediaQuery.of(context).size.width < 1200
-                              ? 0
-                              : 1,
+                          flex:
+                              MediaQuery.of(context).size.width < 1200 ? 0 : 1,
                           child: Flex(
-                            direction:
-                                MediaQuery.of(context).size.width < 1200
-                                    ? Axis.vertical
-                                    : Axis.horizontal,
+                            direction: MediaQuery.of(context).size.width < 1200
+                                ? Axis.vertical
+                                : Axis.horizontal,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Expanded(
@@ -184,8 +261,7 @@ class _AddSchoolFormState extends State<AddSchoolForm> {
                                     ? 0
                                     : 1,
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const FormLabel(
                                         text: "Date of Incorporation *"),
@@ -234,8 +310,7 @@ class _AddSchoolFormState extends State<AddSchoolForm> {
                                     ? 0
                                     : 1,
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const FormLabel(text: "School code *"),
                                     const SizedBox(
@@ -263,8 +338,7 @@ class _AddSchoolFormState extends State<AddSchoolForm> {
                         height: Responsive.isSmall(context) ? 24 : 0,
                       ),
                       Expanded(
-                        flex:
-                            MediaQuery.of(context).size.width < 1200 ? 0 : 1,
+                        flex: MediaQuery.of(context).size.width < 1200 ? 0 : 1,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -452,8 +526,9 @@ class _AddSchoolFormState extends State<AddSchoolForm> {
                                 _school.address = val;
                               },
                               validator: (val) {
-                                if (val == null || val.isEmpty)
+                                if (val == null || val.isEmpty) {
                                   return "Required";
+                                }
                                 return null;
                               },
                               keyboardType: TextInputType.multiline,
@@ -490,8 +565,9 @@ class _AddSchoolFormState extends State<AddSchoolForm> {
                               obscureText: true,
                               textInputAction: TextInputAction.next,
                               validator: (val) {
-                                if (val == null || val.isEmpty)
+                                if (val == null || val.isEmpty) {
                                   return "Required";
+                                }
                                 return null;
                               },
                               label: "Create Password",
@@ -519,10 +595,12 @@ class _AddSchoolFormState extends State<AddSchoolForm> {
                                 _school.password = val;
                               },
                               validator: (val) {
-                                if (val == null || val.isEmpty)
+                                if (val == null || val.isEmpty) {
                                   return "Required";
-                                if (val != _editingControllerPass.text)
+                                }
+                                if (val != _editingControllerPass.text) {
                                   return "Password Doesn't Match";
+                                }
                                 return null;
                               },
                               label: "Check",
@@ -543,13 +621,7 @@ class _AddSchoolFormState extends State<AddSchoolForm> {
                           if (_formKey.currentState!.validate()) {
                             _formKey.currentState!.save();
                             _school.active = true;
-                            var saved =
-                                await Api.saveSchool(context, _school);
-                            if (!mounted) return;
-                            Navigator.pop(context);
-                            if (saved) {
-                              widget.handleNav();
-                            }
+                            saveSchool(_school);
                           }
                         },
                         icon: Icons.add,

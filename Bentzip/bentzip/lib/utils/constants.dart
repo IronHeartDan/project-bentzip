@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:http/http.dart' as http;
 
-import '../models/MenuModel.dart';
+import '../models/menu_model.dart';
 
 final primaryColor = HexColor("#3D3774");
 final primaryDarkColor = HexColor("#170F49");

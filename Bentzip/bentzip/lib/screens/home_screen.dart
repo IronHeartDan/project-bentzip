@@ -1,7 +1,7 @@
 import 'package:bentzip/models/user.dart';
 import 'package:bentzip/screens/add_class.dart';
-import 'package:bentzip/screens/add_student.dart';
-import 'package:bentzip/screens/add_teacher.dart';
+import 'package:bentzip/screens/student_screen.dart';
+import 'package:bentzip/screens/teachers_screen.dart';
 import 'package:bentzip/screens/dashboard_screen.dart';
 import 'package:bentzip/states/connection_state.dart';
 import 'package:bentzip/states/nav_state.dart';
@@ -173,8 +173,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               children: const [
                                 DashBoardScreen(),
                                 AddClass(),
-                                AddTeacher(),
-                                AddStudent(),
+                                TeachersScreen(),
+                                StudentScreen(),
                                 AttendanceScreen(),
                                 PaymentScreen(),
                                 SupportScreen(),

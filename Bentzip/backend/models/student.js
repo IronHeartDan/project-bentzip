@@ -16,7 +16,7 @@ const GuardianSchema = mongoose.Schema({
     trim: true,
     required: true,
   },
-},{ _id : false });
+}, { _id: false });
 
 const Student = mongoose.model(
   "Student",
@@ -63,8 +63,8 @@ const Student = mongoose.model(
       required: true,
     },
     class: {
-      type: String,
-      trim: true,
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
     },
     role: {
       type: Number,

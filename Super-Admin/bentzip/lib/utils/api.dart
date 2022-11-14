@@ -10,7 +10,7 @@ import 'constants.dart';
 class Api {
   static late String token;
 
-  static Future<bool> saveSchool(BuildContext context, School school) async {
+   Future<bool> saveSchool(BuildContext context, School school) async {
     showDialog(
         barrierDismissible: false,
         context: context,

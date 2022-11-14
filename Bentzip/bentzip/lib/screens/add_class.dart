@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:bentzip/models/SchoolClass.dart';
+import 'package:bentzip/models/school_class.dart';
 import 'package:bentzip/utils/constants.dart';
 import 'package:bentzip/utils/responsive.dart';
 import 'package:bentzip/widgets/form_label.dart';
@@ -59,7 +59,7 @@ class _AddClassState extends State<AddClass>
       });
     });
     _scrollController.addListener(() {
-      if(!Responsive.isSmall(context)) return;
+      if (!Responsive.isSmall(context)) return;
       if (_scrollController.position.userScrollDirection ==
           ScrollDirection.forward) {
         if (!fabVisible) {
@@ -86,7 +86,7 @@ class _AddClassState extends State<AddClass>
       loading = true;
     });
 
-    var res = await http.get(Uri.parse("$serverURL/${user.school}/getClasses"),
+    var res = await http.get(Uri.parse("$serverURL/getClasses?school=${user.school}"),
         headers: header);
 
     if (res.statusCode == 400) {
