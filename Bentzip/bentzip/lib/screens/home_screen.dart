@@ -1,9 +1,4 @@
 import 'package:bentzip/models/user.dart';
-import 'package:bentzip/screens/add_class.dart';
-import 'package:bentzip/screens/dashboard_screen.dart';
-import 'package:bentzip/screens/leaves_screen.dart';
-import 'package:bentzip/screens/student_screen.dart';
-import 'package:bentzip/screens/teachers_screen.dart';
 import 'package:bentzip/states/connection_state.dart';
 import 'package:bentzip/states/nav_state.dart';
 import 'package:bentzip/states/user_state.dart';
@@ -13,8 +8,6 @@ import 'package:bentzip/widgets/drawer.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'attendance_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -64,7 +57,11 @@ class _HomeScreenState extends State<HomeScreen> {
       child: BlocBuilder<NavState, int>(builder: (blocContext, navState) {
         if (navState != -1) {
           last = navState;
-          currentTitle = adminSideNav[navState].title;
+          currentTitle = user.role == 0
+              ? adminSideNav[navState].title
+              : user.role == 1
+                  ? teacherSideNav[navState].title
+                  : studentSideNav[navState].title;
         }
         return Scaffold(
           resizeToAvoidBottomInset: false,
@@ -168,16 +165,11 @@ class _HomeScreenState extends State<HomeScreen> {
                               scrollDirection: Axis.vertical,
                               physics: const NeverScrollableScrollPhysics(),
                               controller: pageController,
-                              children: const [
-                                DashBoardScreen(),
-                                AddClass(),
-                                TeachersScreen(),
-                                StudentScreen(),
-                                AttendanceScreen(),
-                                FittedBox(),
-                                LeavesScreen(),
-                                FittedBox(),
-                              ],
+                              children: user.role == 0
+                                  ? adminSideScreens
+                                  : user.role == 1
+                                      ? teacherSideScreens
+                                      : studentSideScreens,
                             ),
                           ),
                         ),

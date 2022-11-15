@@ -1,8 +1,14 @@
+import 'package:bentzip/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
-import 'package:http/http.dart' as http;
 
 import '../models/menu_model.dart';
+import '../screens/add_class.dart';
+import '../screens/attendance_screen.dart';
+import '../screens/dashboard_screen.dart';
+import '../screens/leaves_screen.dart';
+import '../screens/student_screen.dart';
+import '../screens/teachers_screen.dart';
 
 final primaryColor = HexColor("#3D3774");
 final primaryDarkColor = HexColor("#170F49");
@@ -15,8 +21,7 @@ final yellow = HexColor("#FCC43E");
 final green = HexColor("#219653");
 final red = HexColor("#F90706");
 
-
-final roles = ["Admin","Teacher","Student"];
+final roles = ["Admin", "Teacher", "Student"];
 
 final adminSideNav = [
   MenuModel(Icons.dashboard, "Dashboard"),
@@ -30,15 +35,44 @@ final adminSideNav = [
   MenuModel(Icons.power_settings_new, "Sign Out")
 ];
 
+final adminSideScreens = [
+  const DashBoardScreen(),
+  const AddClass(),
+  const TeachersScreen(),
+  const StudentScreen(),
+  const AttendanceScreen(),
+  const FittedBox(),
+  const LeavesScreen(),
+  const FittedBox(),
+];
+
 final teacherSideNav = [
   MenuModel(Icons.dashboard, "Dashboard"),
+  MenuModel(Icons.account_circle, "Profile"),
   MenuModel(Icons.add_box_outlined, "Attendance"),
   MenuModel(Icons.add_box_outlined, "Leave Approval"),
   MenuModel(Icons.power_settings_new, "Sign Out")
 ];
 
+final teacherSideScreens = [
+  const DashBoardScreen(),
+  const ProfileScreen(),
+  const FittedBox(),
+  const FittedBox(),
+];
+
 final studentSideNav = [
+  MenuModel(Icons.dashboard, "Dashboard"),
+  MenuModel(Icons.account_circle, "Profile"),
+  MenuModel(Icons.add_box_outlined, "Attendance"),
   MenuModel(Icons.power_settings_new, "Sign Out")
+];
+
+final studentSideScreens = [
+  const DashBoardScreen(),
+  const ProfileScreen(),
+  const FittedBox(),
+  const FittedBox(),
 ];
 
 const String serverURL = "http://192.168.1.38:3001";

@@ -1,5 +1,4 @@
 import 'package:bentzip/models/user.dart';
-import 'package:bentzip/screens/auth_screen.dart';
 import 'package:bentzip/states/nav_state.dart';
 import 'package:bentzip/states/user_state.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +7,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hexcolor/hexcolor.dart';
 
 import '../models/menu_model.dart';
+import '../screens/auth_screen.dart';
 import '../utils/constants.dart';
 
 class CustomDrawer extends StatefulWidget {
@@ -39,6 +39,45 @@ class _CustomDrawerState extends State<CustomDrawer> {
     super.initState();
   }
 
+  Future _signOut() async {
+    showDialog(
+        context: context,
+        builder: (buildContext) {
+          return AlertDialog(
+            title: const Text("Sign Out ?"),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  context.read<NavState>().setNav(0);
+                  await secureStorage.delete(key: "user");
+                  if (!mounted) return;
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                          builder: (context) => const AuthScreen()),
+                      (route) => false);
+                },
+                child: const Text(
+                  "Yes",
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  navBack();
+                },
+                child: const Text(
+                  "No",
+                ),
+              )
+            ],
+          );
+        });
+  }
+
+  void navBack() {
+    Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<NavState, int>(builder: (blocContext, state) {
@@ -63,14 +102,8 @@ class _CustomDrawerState extends State<CustomDrawer> {
                           left: 46, bottom: index == length - 1 ? 30 : 0),
                       child: ListTile(
                         onTap: index == length - 1
-                            ? () async {
-                                await secureStorage.delete(key: "user");
-                                if(!mounted) return;
-                                Navigator.of(context).pushAndRemoveUntil(
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const AuthScreen()),
-                                    (route) => false);
+                            ? () {
+                                _signOut();
                               }
                             : () {
                                 context.read<NavState>().setNav(index);

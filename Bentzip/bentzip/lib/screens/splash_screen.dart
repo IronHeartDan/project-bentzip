@@ -26,6 +26,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future splash() async {
+    // await secureStorage.delete(key: "user");
     await Future.delayed(const Duration(seconds: 2));
     var check = await secureStorage.read(key: "user");
     print(check);

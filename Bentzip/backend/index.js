@@ -72,6 +72,7 @@ async function startServer() {
         token: token,
         name: user.name ?? null,
         school: user.school,
+        id: user._id,
         role: user.role,
       });
 
@@ -383,14 +384,14 @@ async function startServer() {
             'localField': 'user',
             'foreignField': '_id',
             'as': 'user',
-            'pipeline': [ {
-                '$project': {
-                  '_id': 0,
-                  'userId': '$_id',
-                  'name': 1,
-                  'role': 1
-                }
+            'pipeline': [{
+              '$project': {
+                '_id': 0,
+                'userId': '$_id',
+                'name': 1,
+                'role': 1
               }
+            }
             ]
           }
         }, {
@@ -410,6 +411,21 @@ async function startServer() {
       res.status(200).send(leaves);
     } catch (error) {
       res.status(400).send(error);
+    }
+  });
+
+  // Leave Action
+  app.post("/updateLeave", verifyAuth, async (req, res) => {
+    let body = req.body;
+    if (checkBody(body)) {
+      let result = await Leave.findByIdAndUpdate(body.id, {
+        $set: {
+          status: body.status,
+        }
+      }, { new: true });
+      res.status(200).send(result);
+    } else {
+      res.status(400).send("Request Body not found");
     }
   });
   // End Of Leaves

@@ -23,7 +23,7 @@ class Item {
   Item(this.leave, this.expanded);
 }
 
-class _LeavesScreenState extends State<LeavesScreen> {
+class _LeavesScreenState extends State<LeavesScreen> with AutomaticKeepAliveClientMixin{
   bool loading = false;
   late User user;
   late var header;
@@ -58,13 +58,35 @@ class _LeavesScreenState extends State<LeavesScreen> {
       var resBody = jsonDecode(res.body);
       leaves =
           (resBody as List).map((e) => Item(Leave.fromJson(e), false)).toList();
-      setState(() {
-        loading = false;
-      });
     }
 
     setState(() {
       loading = false;
+    });
+  }
+
+  Future _updateLeave(String id, int status) async {
+    setState(() {
+      loading = true;
+    });
+
+    var body = {"id": id, "status": status};
+
+    var res = await http.post(Uri.parse("$serverURL/updateLeave"),
+        headers: header, body: jsonEncode(body));
+
+    if (res.statusCode == 400) {
+      showSnack(res.body, true);
+      return;
+    }
+
+    if (res.statusCode == 200) {
+      _getLeaves();
+      setState(() {});
+    }
+
+    setState(() {
+      loading = true;
     });
   }
 
@@ -77,22 +99,36 @@ class _LeavesScreenState extends State<LeavesScreen> {
               DataCell(Text(item.leave.start)),
               DataCell(Text(item.leave.end)),
               DataCell(Text(item.leave.role == 1 ? "Teacher" : "Student")),
-              DataCell(Row(
-                children: [
-                  IconButton(
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.check,
-                        color: Colors.green,
-                      )),
-                  IconButton(
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.close,
-                        color: Colors.red,
-                      )),
-                ],
-              )),
+              item.leave.status == 0
+                  ? DataCell(Row(
+                      children: [
+                        IconButton(
+                            onPressed: () {
+                              _updateLeave(item.leave.id, 1);
+                            },
+                            icon: const Icon(
+                              Icons.check,
+                              color: Colors.green,
+                            )),
+                        IconButton(
+                            onPressed: () {
+                              _updateLeave(item.leave.id, -1);
+                            },
+                            icon: const Icon(
+                              Icons.close,
+                              color: Colors.red,
+                            )),
+                      ],
+                    ))
+                  : item.leave.status < 0
+                      ? const DataCell(Text(
+                          "Denied",
+                          style: TextStyle(color: Colors.red),
+                        ))
+                      : const DataCell(Text(
+                          "Granted",
+                          style: TextStyle(color: Colors.green),
+                        )),
             ]))
         .toList();
   }
@@ -111,6 +147,7 @@ class _LeavesScreenState extends State<LeavesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return loading
         ? Center(
             child: CircularProgressIndicator(
@@ -145,4 +182,6 @@ class _LeavesScreenState extends State<LeavesScreen> {
             },
           );
   }
+  @override
+  bool get wantKeepAlive => true;
 }

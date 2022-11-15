@@ -1,5 +1,5 @@
 class Leave {
-  String _id;
+  String id;
   int userId;
   int school;
   String start;
@@ -9,7 +9,7 @@ class Leave {
   String name;
   int role;
 
-  Leave(this._id, this.userId, this.school, this.start, this.end, this.reason,
+  Leave(this.id, this.userId, this.school, this.start, this.end, this.reason,
       this.status, this.name, this.role);
 
   factory Leave.fromJson(Map<String, dynamic> json) {
