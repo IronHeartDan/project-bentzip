@@ -118,32 +118,6 @@ class _StudentProfileState extends State<StudentProfile> {
                                 BorderRadius.all(Radius.circular(10)),
                           ),
                           child: const Icon(
-                            Icons.location_pin,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 10,
-                          height: 10,
-                        ),
-                        Text(widget.student.address),
-                      ],
-                    ),
-                    const SizedBox(
-                      width: 20,
-                      height: 20,
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(5),
-                          decoration: const BoxDecoration(
-                            color: Colors.orange,
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(10)),
-                          ),
-                          child: const Icon(
                             Icons.phone,
                             color: Colors.white,
                           ),
@@ -180,7 +154,33 @@ class _StudentProfileState extends State<StudentProfile> {
                         ),
                         Text(widget.student.email),
                       ],
-                    )
+                    ),
+                    const SizedBox(
+                      width: 20,
+                      height: 20,
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(5),
+                          decoration: const BoxDecoration(
+                            color: Colors.orange,
+                            borderRadius:
+                            BorderRadius.all(Radius.circular(10)),
+                          ),
+                          child: const Icon(
+                            Icons.location_pin,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 10,
+                          height: 10,
+                        ),
+                        Text(widget.student.address),
+                      ],
+                    ),
                   ],
                 ),
                 const SizedBox(

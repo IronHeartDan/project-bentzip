@@ -85,13 +85,11 @@ class _TeachersTableState extends State<TeachersTable>
                   const SizedBox(
                     width: 5,
                   ),
-                  GestureDetector(
-                      onTap: () {
+                  IconButton(
+                      onPressed: () {
                         widget.showTeacherProfile(item.schoolTeacher);
                       },
-                      child: const MouseRegion(
-                          cursor: SystemMouseCursors.click,
-                          child: Icon(Icons.visibility)))
+                      icon: const Icon(Icons.visibility)),
                 ]),
               ),
             ]))

@@ -25,6 +25,7 @@ const Teacher = require("./models/teacher");
 const Student = require("./models/student");
 const Class = require("./models/class");
 const Counter = require("./models/counter");
+const Leave = require("./models/leave");
 
 DB.connectDB()
   .then(() => {
@@ -348,6 +349,70 @@ async function startServer() {
   });
 
   // End Of Find Student
+
+
+  // Leaves
+
+  // Request For Leave / Add Leave
+  app.post("/requestLeave", verifyAuth, async (req, res) => {
+    let body = req.body;
+    if (checkBody(body)) {
+      try {
+        let leave = new Leave(body);
+        await leave.save();
+        res.status(200).send("OK");
+      } catch (error) {
+        res.status(400).send(error);
+      }
+    } else {
+      res.status(400).send("Request Body not found");
+    }
+  });
+
+  // Get Leaves
+  app.get("/getLeaveRequests", verifyAuth, async (req, res) => {
+    try {
+      let leaves = await Leave.aggregate([
+        {
+          '$match': {
+            'school': parseInt(req.query.school),
+          }
+        }, {
+          '$lookup': {
+            'from': 'users',
+            'localField': 'user',
+            'foreignField': '_id',
+            'as': 'user',
+            'pipeline': [ {
+                '$project': {
+                  '_id': 0,
+                  'userId': '$_id',
+                  'name': 1,
+                  'role': 1
+                }
+              }
+            ]
+          }
+        }, {
+          '$unwind': {
+            'path': '$user'
+          }
+        }, {
+          '$replaceWith': {
+            '$mergeObjects': [
+              '$$ROOT', '$user'
+            ]
+          }
+        }, {
+          '$unset': 'user'
+        }
+      ]);
+      res.status(200).send(leaves);
+    } catch (error) {
+      res.status(400).send(error);
+    }
+  });
+  // End Of Leaves
 
   // Server Listening
   server.listen(PORT, () => {

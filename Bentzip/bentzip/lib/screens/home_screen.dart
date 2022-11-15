@@ -1,8 +1,9 @@
 import 'package:bentzip/models/user.dart';
 import 'package:bentzip/screens/add_class.dart';
+import 'package:bentzip/screens/dashboard_screen.dart';
+import 'package:bentzip/screens/leaves_screen.dart';
 import 'package:bentzip/screens/student_screen.dart';
 import 'package:bentzip/screens/teachers_screen.dart';
-import 'package:bentzip/screens/dashboard_screen.dart';
 import 'package:bentzip/states/connection_state.dart';
 import 'package:bentzip/states/nav_state.dart';
 import 'package:bentzip/states/user_state.dart';
@@ -14,9 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'attendance_screen.dart';
-import 'payment_screen.dart';
-import 'report_screen.dart';
-import 'support_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -176,9 +174,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 TeachersScreen(),
                                 StudentScreen(),
                                 AttendanceScreen(),
-                                PaymentScreen(),
-                                SupportScreen(),
-                                ReportScreen(),
+                                FittedBox(),
+                                LeavesScreen(),
+                                FittedBox(),
                               ],
                             ),
                           ),
