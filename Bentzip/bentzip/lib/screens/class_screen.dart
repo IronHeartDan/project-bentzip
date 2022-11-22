@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:bentzip/models/school_class.dart';
+import 'package:bentzip/screens/class_details.dart';
+import 'package:bentzip/utils/UpperCaseFormatter.dart';
 import 'package:bentzip/utils/constants.dart';
 import 'package:bentzip/utils/responsive.dart';
 import 'package:bentzip/widgets/form_label.dart';
@@ -8,20 +10,22 @@ import 'package:bentzip/widgets/primary_buttton.dart';
 import 'package:bentzip/widgets/secondary_buttton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/user.dart';
+import '../states/actions_state.dart';
 import '../states/nav_state.dart';
 import '../states/user_state.dart';
 import '../widgets/form_input.dart';
 
-class AddClass extends StatefulWidget {
-  const AddClass({Key? key}) : super(key: key);
+class ClassScreen extends StatefulWidget {
+  const ClassScreen({Key? key}) : super(key: key);
 
   @override
-  State<AddClass> createState() => _AddClassState();
+  State<ClassScreen> createState() => _ClassScreenState();
 }
 
 class Item {
@@ -31,10 +35,10 @@ class Item {
   Item(this.schoolClass, this.expanded);
 }
 
-class _AddClassState extends State<AddClass>
+class _ClassScreenState extends State<ClassScreen>
     with AutomaticKeepAliveClientMixin {
-  final _navController = PageController();
-  double currentNav = 0;
+  final _navController = PageController(initialPage: 1);
+  double currentNav = 1;
   final ScrollController _scrollController = ScrollController();
   bool fabVisible = true;
 
@@ -43,8 +47,17 @@ class _AddClassState extends State<AddClass>
   late User user;
   late var header;
 
+  String? _currentClass;
+
   @override
   void initState() {
+    context.read<ActionsState>().setActions([
+      IconButton(
+          onPressed: () {
+            getClasses();
+          },
+          icon: const Icon(Icons.refresh))
+    ]);
     user = context.read<UserState>().state!;
     header = {
       "Content-Type": "application/json",
@@ -86,7 +99,8 @@ class _AddClassState extends State<AddClass>
       loading = true;
     });
 
-    var res = await http.get(Uri.parse("$serverURL/getClasses?school=${user.school}"),
+    var res = await http.get(
+        Uri.parse("$serverURL/getClasses?school=${user.school}"),
         headers: header);
 
     if (res.statusCode == 400) {
@@ -108,15 +122,13 @@ class _AddClassState extends State<AddClass>
   List<DataRow> _buildRows() {
     return classes
         .map((item) => DataRow(cells: [
-              DataCell(Text(item.schoolClass.standard)),
+              DataCell(Text(item.schoolClass.standard.toString())),
               DataCell(
                 Row(
                   children: [
                     Expanded(
                         child: Wrap(
-                      children: _buildChips(item.schoolClass.classes
-                          .map((e) => e["section"])
-                          .toList()),
+                      children: _buildChips(item.schoolClass.classes),
                     )),
                     const SizedBox(
                       width: 5,
@@ -134,13 +146,26 @@ class _AddClassState extends State<AddClass>
         .toList();
   }
 
-  List<Widget> _buildChips(List<dynamic> label) {
-    return label
+  List<Widget> _buildChips(List<dynamic> classes) {
+    return classes
         .map(
           (e) => Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Chip(
-              label: Text(e, style: const TextStyle(color: Colors.white)),
+            child: InputChip(
+              tooltip: "View Class",
+              deleteIconColor: Colors.white,
+              onDeleted: () {},
+              onPressed: () {
+                setState(() {
+                  _currentClass = e["id"];
+                });
+                context.read<NavState>().setNav(-1);
+                _navController.animateToPage(0,
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.ease);
+              },
+              label: Text(e["section"],
+                  style: const TextStyle(color: Colors.white)),
               backgroundColor: primaryColor,
             ),
           ),
@@ -150,7 +175,7 @@ class _AddClassState extends State<AddClass>
 
   Future _addClass(SchoolClass? schoolClass, int type) async {
     var formKey = GlobalKey<FormState>();
-    String? standard;
+    int? standard;
     String? section;
     showDialog(
         context: context,
@@ -158,59 +183,61 @@ class _AddClassState extends State<AddClass>
           return AlertDialog(
             title:
                 type == 0 ? const Text("Add Class") : const Text("Add Section"),
-            content: SizedBox(
-              height: type == 0 ? 250 : 120,
-              child: Form(
-                key: formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    type == 0
-                        ? const FormLabel(text: "Standard")
-                        : const FittedBox(),
-                    type == 0
-                        ? const SizedBox(
-                            height: 10,
-                          )
-                        : const FittedBox(),
-                    type == 0
-                        ? FormInput(
-                            onSaved: (val) {
-                              standard = val;
-                            },
-                            validator: (val) {
-                              return val == null || val.isEmpty
-                                  ? "Enter Standard"
-                                  : null;
-                            },
-                          )
-                        : Text("Class : ${schoolClass!.standard}"),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    type == 0
-                        ? const FormLabel(text: "Section")
-                        : const FittedBox(),
-                    type == 0
-                        ? const SizedBox(
-                            height: 10,
-                          )
-                        : const FittedBox(),
-                    FormInput(
-                      onSaved: (val) {
-                        section = val;
-                      },
-                      validator: (val) {
-                        return val == null || val.isEmpty
-                            ? "Enter Section"
-                            : null;
-                      },
-                    ),
-                  ],
-                ),
+            content: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  type == 0
+                      ? const FormLabel(text: "Standard")
+                      : const FittedBox(),
+                  type == 0
+                      ? const SizedBox(
+                          height: 10,
+                        )
+                      : const FittedBox(),
+                  type == 0
+                      ? FormInput(
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          onSaved: (val) {
+                            standard = int.parse(val!);
+                          },
+                          validator: (val) {
+                            return val == null || val.isEmpty
+                                ? "Enter Standard"
+                                : null;
+                          },
+                        )
+                      : Text("Class : ${schoolClass!.standard}"),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  type == 0
+                      ? const FormLabel(text: "Section")
+                      : const FittedBox(),
+                  type == 0
+                      ? const SizedBox(
+                          height: 10,
+                        )
+                      : const FittedBox(),
+                  FormInput(
+                    inputFormatters: [UpperCaseFormatter()],
+                    onSaved: (val) {
+                      section = val;
+                    },
+                    validator: (val) {
+                      return val == null || val.isEmpty
+                          ? "Enter Section"
+                          : null;
+                    },
+                  ),
+                ],
               ),
             ),
             actions: [
@@ -267,7 +294,7 @@ class _AddClassState extends State<AddClass>
         });
   }
 
-  Future addClass(String standard, String section, int type) async {
+  Future addClass(int standard, String section, int type) async {
     var body = jsonEncode({
       "school": user.school,
       "standard": standard,
@@ -306,9 +333,9 @@ class _AddClassState extends State<AddClass>
   }
 
   Future _handleNav() async {
-    if (currentNav == 1) {
+    if (currentNav != 1) {
       context.read<NavState>().setNav(1);
-      _navController.animateToPage(0,
+      _navController.animateToPage(1,
           duration: const Duration(milliseconds: 200), curve: Curves.ease);
     } else {
       context.read<NavState>().setNav(0);
@@ -341,7 +368,7 @@ class _AddClassState extends State<AddClass>
                         width: 20,
                       ),
                       Visibility(
-                        visible: currentNav == 0,
+                        visible: currentNav == 1,
                         child: PrimaryButton(
                           text: "Add Class",
                           onPress: () {
@@ -370,7 +397,14 @@ class _AddClassState extends State<AddClass>
               child: BlocListener<NavState, int>(
                 listener: (blocContext, navState) {
                   if (navState == 1) {
-                    _navController.animateToPage(0,
+                    context.read<ActionsState>().setActions([
+                      IconButton(
+                          onPressed: () {
+                            getClasses();
+                          },
+                          icon: const Icon(Icons.refresh))
+                    ]);
+                    _navController.animateToPage(1,
                         duration: const Duration(milliseconds: 200),
                         curve: Curves.ease);
                   }
@@ -379,6 +413,9 @@ class _AddClassState extends State<AddClass>
                   controller: _navController,
                   physics: const NeverScrollableScrollPhysics(),
                   children: [
+                    _currentClass != null
+                        ? ClassDetails(id: _currentClass!)
+                        : const FittedBox(),
                     loading
                         ? Center(
                             child: CircularProgressIndicator(
@@ -430,11 +467,8 @@ class _AddClassState extends State<AddClass>
                                                     height: 10,
                                                   ),
                                                   Wrap(
-                                                    children: _buildChips(e
-                                                        .schoolClass.classes
-                                                        .map(
-                                                            (e) => e["section"])
-                                                        .toList()),
+                                                    children: _buildChips(
+                                                        e.schoolClass.classes),
                                                   ),
                                                   const SizedBox(
                                                     height: 10,
@@ -485,7 +519,7 @@ class _AddClassState extends State<AddClass>
         ),
         floatingActionButton: Responsive.isSmall(context)
             ? AnimatedScale(
-                scale: currentNav == 1
+                scale: currentNav != 1
                     ? 0
                     : fabVisible
                         ? 1

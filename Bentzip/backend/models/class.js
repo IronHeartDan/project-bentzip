@@ -2,21 +2,17 @@ const mongoose = require("mongoose");
 
 const classSchema = new mongoose.Schema({
   school: {
-    type: String,
+    type: Number,
     trim: true,
     required: true,
   },
   standard: {
-    type: String,
+    type: Number,
     required: true,
   },
   section: {
     type: String,
     required: true,
-  },
-  teacher: {
-    type: String,
-    trim: true,
   },
 });
 

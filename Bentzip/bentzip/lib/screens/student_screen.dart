@@ -22,8 +22,8 @@ class StudentScreen extends StatefulWidget {
 
 class _StudentScreenState extends State<StudentScreen>
     with AutomaticKeepAliveClientMixin {
-  final _navController = PageController();
-  double currentNav = 0;
+  final _navController = PageController(initialPage: 1);
+  double currentNav = 1;
 
   SchoolStudent? _schoolStudent;
 

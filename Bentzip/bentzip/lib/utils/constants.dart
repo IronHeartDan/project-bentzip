@@ -1,10 +1,11 @@
+import 'package:bentzip/screens/notice_screen.dart';
 import 'package:bentzip/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 
 import '../models/menu_model.dart';
-import '../screens/add_class.dart';
 import '../screens/attendance_screen.dart';
+import '../screens/class_screen.dart';
 import '../screens/dashboard_screen.dart';
 import '../screens/leaves_screen.dart';
 import '../screens/student_screen.dart';
@@ -37,11 +38,11 @@ final adminSideNav = [
 
 final adminSideScreens = [
   const DashBoardScreen(),
-  const AddClass(),
+  const ClassScreen(),
   const TeachersScreen(),
   const StudentScreen(),
   const AttendanceScreen(),
-  const FittedBox(),
+  const NoticeScreen(),
   const LeavesScreen(),
   const FittedBox(),
 ];
@@ -75,4 +76,5 @@ final studentSideScreens = [
   const FittedBox(),
 ];
 
-const String serverURL = "http://192.168.1.38:3001";
+// const String serverURL = "http://192.168.1.38:3001";
+const String serverURL = "https://bentzip.herokuapp.com";

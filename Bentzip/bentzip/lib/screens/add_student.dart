@@ -11,6 +11,7 @@ import 'package:intl/intl.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
 import '../models/user.dart';
+import '../states/nav_title_state.dart';
 import '../states/user_state.dart';
 import '../utils/responsive.dart';
 import '../widgets/form_input.dart';
@@ -45,6 +46,7 @@ class _AddStudentState extends State<AddStudent> {
 
   @override
   void initState() {
+    context.read<NavTitleState>().setNavTitle("Add Student");
     user = context.read<UserState>().state!;
     header = {
       "Content-Type": "application/json",
@@ -76,8 +78,8 @@ class _AddStudentState extends State<AddStudent> {
 
     classesList = _classes
         .map((e) => DropdownMenuItem<String>(
-              value: e.standard,
-              child: Text(e.standard),
+              value: e.standard.toString(),
+              child: Text(e.standard.toString()),
             ))
         .toList(growable: true);
 

@@ -1,5 +1,5 @@
 class SchoolClass {
-  String standard;
+  int standard;
   List<dynamic> classes;
 
   SchoolClass(this.standard, this.classes);

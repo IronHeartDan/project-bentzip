@@ -22,8 +22,8 @@ class TeachersScreen extends StatefulWidget {
 
 class _TeachersScreenState extends State<TeachersScreen>
     with AutomaticKeepAliveClientMixin {
-  final _navController = PageController();
-  double currentNav = 0;
+  final _navController = PageController(initialPage: 1);
+  double currentNav = 1;
 
   SchoolTeacher? _schoolTeacher;
 
@@ -40,7 +40,7 @@ class _TeachersScreenState extends State<TeachersScreen>
   }
 
   Future _handleNav() async {
-    if (currentNav == 0 || currentNav == 2) {
+    if (currentNav != 1) {
       context.read<NavState>().setNav(2);
     } else {
       context.read<NavState>().setNav(0);

@@ -1,13 +1,16 @@
 import 'dart:convert';
 
 import 'package:bentzip/models/leave.dart';
+import 'package:bentzip/states/actions_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/user.dart';
+import '../states/nav_state.dart';
 import '../states/user_state.dart';
 import '../utils/constants.dart';
+import '../utils/responsive.dart';
 
 class LeavesScreen extends StatefulWidget {
   const LeavesScreen({Key? key}) : super(key: key);
@@ -23,7 +26,8 @@ class Item {
   Item(this.leave, this.expanded);
 }
 
-class _LeavesScreenState extends State<LeavesScreen> with AutomaticKeepAliveClientMixin{
+class _LeavesScreenState extends State<LeavesScreen>
+    with AutomaticKeepAliveClientMixin {
   bool loading = false;
   late User user;
   late var header;
@@ -31,6 +35,13 @@ class _LeavesScreenState extends State<LeavesScreen> with AutomaticKeepAliveClie
 
   @override
   void initState() {
+    context.read<ActionsState>().setActions([
+      IconButton(
+          onPressed: () {
+            _getLeaves();
+          },
+          icon: const Icon(Icons.refresh))
+    ]);
     user = context.read<UserState>().state!;
     header = {
       "Content-Type": "application/json",
@@ -148,40 +159,168 @@ class _LeavesScreenState extends State<LeavesScreen> with AutomaticKeepAliveClie
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return loading
-        ? Center(
-            child: CircularProgressIndicator(
-              color: primaryColor,
-            ),
-          )
-        : LayoutBuilder(
-            builder: (buildContext, boxConstraints) {
-              return SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: ConstrainedBox(
-                  constraints:
-                      BoxConstraints(minWidth: boxConstraints.minWidth),
-                  child: SingleChildScrollView(
-                    child: DataTable(
-                      columnSpacing: 10,
-                      showBottomBorder: true,
-                      columns: const [
-                        DataColumn(label: Text("ID")),
-                        DataColumn(label: Text("Name")),
-                        DataColumn(label: Text("Reason")),
-                        DataColumn(label: Text("From")),
-                        DataColumn(label: Text("To")),
-                        DataColumn(label: Text("Role")),
-                        DataColumn(label: Text("Action")),
-                      ],
-                      rows: _buildRows(),
-                    ),
+    return BlocListener<NavState, int>(
+      listener: (_, state) {
+        if (state == 6) {
+          context.read<ActionsState>().setActions([
+            IconButton(
+                onPressed: () {
+                  _getLeaves();
+                },
+                icon: const Icon(Icons.refresh))
+          ]);
+        }
+      },
+      child: loading
+          ? Center(
+              child: CircularProgressIndicator(
+                color: primaryColor,
+              ),
+            )
+          : Responsive.isSmall(context)
+              ? SingleChildScrollView(
+                  child: ExpansionPanelList(
+                    expansionCallback: (int index, bool isExpanded) {
+                      setState(() {
+                        leaves[index].expanded = !isExpanded;
+                      });
+                    },
+                    children: leaves
+                        .map((e) => ExpansionPanel(
+                              isExpanded: e.expanded,
+                              headerBuilder:
+                                  (BuildContext context, bool isExpanded) {
+                                return ListTile(
+                                  title: Text(e.leave.name,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w500)),
+                                  subtitle: Text(
+                                    e.leave.status == 0
+                                        ? "Pending"
+                                        : e.leave.status == 1
+                                            ? "Approved"
+                                            : "Declined",
+                                    style: TextStyle(
+                                        color: e.leave.status == 0
+                                            ? null
+                                            : e.leave.status == 1
+                                                ? Colors.green
+                                                : Colors.red),
+                                  ),
+                                  leading: e.leave.role == 1
+                                      ? const Icon(Icons.school)
+                                      : const Icon(Icons.account_circle),
+                                );
+                              },
+                              body: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Text(
+                                        "UserID",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w500),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8.0),
+                                      child: Text(e.leave.userId.toString()),
+                                    ),
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                    const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Text(
+                                        "Reason",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w500),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8.0),
+                                      child: Text(e.leave.reason),
+                                    ),
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                    Visibility(
+                                      visible: e.leave.status == 0,
+                                      child: const Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: Text(
+                                          "Actions",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.w500),
+                                        ),
+                                      ),
+                                    ),
+                                    Visibility(
+                                      visible: e.leave.status == 0,
+                                      child: Row(
+                                        children: [
+                                          IconButton(
+                                              onPressed: () {
+                                                _updateLeave(e.leave.id, 1);
+                                              },
+                                              icon: const Icon(
+                                                Icons.check,
+                                                color: Colors.green,
+                                              )),
+                                          IconButton(
+                                              onPressed: () {
+                                                _updateLeave(e.leave.id, -1);
+                                              },
+                                              icon: const Icon(
+                                                Icons.close,
+                                                color: Colors.red,
+                                              )),
+                                        ],
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ))
+                        .toList(),
                   ),
+                )
+              : LayoutBuilder(
+                  builder: (buildContext, boxConstraints) {
+                    return SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: ConstrainedBox(
+                        constraints:
+                            BoxConstraints(minWidth: boxConstraints.minWidth),
+                        child: SingleChildScrollView(
+                          child: DataTable(
+                            columnSpacing: 10,
+                            showBottomBorder: true,
+                            columns: const [
+                              DataColumn(label: Text("ID")),
+                              DataColumn(label: Text("Name")),
+                              DataColumn(label: Text("Reason")),
+                              DataColumn(label: Text("From")),
+                              DataColumn(label: Text("To")),
+                              DataColumn(label: Text("Role")),
+                              DataColumn(label: Text("Action")),
+                            ],
+                            rows: _buildRows(),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
-          );
+    );
   }
+
   @override
   bool get wantKeepAlive => true;
 }

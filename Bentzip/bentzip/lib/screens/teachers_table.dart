@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:bentzip/models/school_teacher.dart';
+import 'package:bentzip/utils/repository.dart';
 import 'package:bentzip/widgets/primary_buttton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -34,9 +35,10 @@ class _TeachersTableState extends State<TeachersTable>
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
   late User user;
-  late var header;
+  late Map<String, String>? header;
   bool loading = false;
-  late List<Item> classes;
+  late List<Item> teachers;
+  late Repository repository;
 
   @override
   void initState() {
@@ -45,6 +47,7 @@ class _TeachersTableState extends State<TeachersTable>
       "Content-Type": "application/json",
       "Authorization": user.token,
     };
+    repository = RepositoryProvider.of<Repository>(context);
     getTeachers();
     super.initState();
   }
@@ -53,21 +56,12 @@ class _TeachersTableState extends State<TeachersTable>
     setState(() {
       loading = true;
     });
-
-    var res = await http.get(
-        Uri.parse("$serverURL/getTeachers?school=${user.school}"),
-        headers: header);
-
-    if (res.statusCode == 400) {
-      showSnack(res.body, true);
-      return;
-    }
-
-    if (res.statusCode == 200) {
-      var resBody = jsonDecode(res.body);
-      classes = (resBody as List)
-          .map((e) => Item(SchoolTeacher.fromJson(e), false))
-          .toList();
+    try {
+      var res = await repository.getTeachers();
+      teachers = res.map((e) => Item(e, false)).toList();
+    } catch (e) {
+      print(e);
+    } finally {
       setState(() {
         loading = false;
       });
@@ -75,9 +69,9 @@ class _TeachersTableState extends State<TeachersTable>
   }
 
   List<DataRow> _buildRows() {
-    return classes
+    return teachers
         .map((item) => DataRow(cells: [
-              DataCell(Text(item.schoolTeacher.id)),
+              DataCell(Text(item.schoolTeacher.id.toString())),
               DataCell(Text(item.schoolTeacher.name)),
               DataCell(
                 Row(children: [
@@ -190,10 +184,10 @@ class _TeachersTableState extends State<TeachersTable>
                       child: ExpansionPanelList(
                         expansionCallback: (int index, bool isExpanded) {
                           setState(() {
-                            classes[index].expanded = !isExpanded;
+                            teachers[index].expanded = !isExpanded;
                           });
                         },
-                        children: classes
+                        children: teachers
                             .map((e) => ExpansionPanel(
                                   isExpanded: e.expanded,
                                   headerBuilder:
@@ -226,7 +220,7 @@ class _TeachersTableState extends State<TeachersTable>
                                         const SizedBox(
                                           height: 10,
                                         ),
-                                        Text(e.schoolTeacher.id),
+                                        Text(e.schoolTeacher.id.toString()),
                                         const SizedBox(
                                           height: 10,
                                         ),

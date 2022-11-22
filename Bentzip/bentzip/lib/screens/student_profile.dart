@@ -2,8 +2,11 @@ import 'package:bentzip/models/school_student.dart';
 import 'package:bentzip/utils/constants.dart';
 import 'package:bentzip/utils/responsive.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+
+import '../states/nav_title_state.dart';
 
 class StudentProfile extends StatefulWidget {
   final SchoolStudent student;
@@ -15,6 +18,13 @@ class StudentProfile extends StatefulWidget {
 }
 
 class _StudentProfileState extends State<StudentProfile> {
+
+  @override
+  void initState() {
+    context.read<NavTitleState>().setNavTitle(widget.student.name);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(

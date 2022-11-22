@@ -12,6 +12,7 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
+import '../states/nav_title_state.dart';
 import '../utils/responsive.dart';
 import '../widgets/form_input.dart';
 import '../widgets/form_label.dart';
@@ -45,6 +46,7 @@ class _AddTeacherState extends State<AddTeacher> {
 
   @override
   void initState() {
+    context.read<NavTitleState>().setNavTitle("Add Teacher");
     user = context.read<UserState>().state!;
     header = {
       "Content-Type": "application/json",

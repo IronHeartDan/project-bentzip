@@ -26,6 +26,9 @@ const Student = require("./models/student");
 const Class = require("./models/class");
 const Counter = require("./models/counter");
 const Leave = require("./models/leave");
+const Notice = require("./models/notice");
+const { StudentAttendance, TeacherAttendance } = require("./models/attendance");
+
 
 DB.connectDB()
   .then(() => {
@@ -39,15 +42,6 @@ DB.connectDB()
 async function startServer() {
   // Config Env
   dotenv.config();
-
-  // Config Node Mailer
-  let transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.MAIL_ID,
-      pass: process.env.MAIL_PASSWORD,
-    },
-  });
 
   // Base Server Request
   app.get("/", (req, res) => {
@@ -83,14 +77,7 @@ async function startServer() {
 
   app.post("/resetPassword", async (req, res) => {
     try {
-      let mail = await transporter.sendMail({
-        from: process.env.MAIL_ID,
-        to: "danishkhan.dk2.dk16@gmail.com",
-        subject: "Test Mail",
-        text: "Yaay",
-      });
-      console.log(mail.accepted);
-      res.status(200).send(mail);
+
     } catch (error) {
       res.status(400).send(error);
     }
@@ -129,7 +116,7 @@ async function startServer() {
       let classes = await Class.aggregate([
         {
           '$match': {
-            'school': `${req.query.school}`
+            'school': parseInt(req.query.school)
           }
         }, {
           '$group': {
@@ -138,7 +125,7 @@ async function startServer() {
             },
             'classes': {
               '$push': {
-                '_id': '$_id',
+                'id': '$_id',
                 'section': '$section'
               }
             }
@@ -164,8 +151,52 @@ async function startServer() {
   // Get Class
   app.get("/getClass", verifyAuth, async (req, res) => {
     try {
-      let schoolClass = await Class.findById(req.query.id);
-      res.status(200).send(schoolClass);
+      let schoolClass = await Class.aggregate([
+        {
+          '$match': {
+            '_id': mongoose.Types.ObjectId(req.query.id),
+          }
+        }, {
+          '$lookup': {
+            'from': 'users',
+            'localField': '_id',
+            'foreignField': 'class',
+            'as': 'students',
+            'pipeline': [
+              {
+                '$match': {
+                  'role': 2
+                }
+              }, {
+                '$project': {
+                  '_id': 1,
+                  'name': 1
+                }
+              }
+            ]
+          }
+        }, {
+          '$lookup': {
+            'from': 'users',
+            'localField': '_id',
+            'foreignField': 'class',
+            'as': 'teachers',
+            'pipeline': [
+              {
+                '$match': {
+                  'role': 1
+                }
+              }, {
+                '$project': {
+                  '_id': 1,
+                  'name': 1
+                }
+              }
+            ]
+          }
+        }
+      ]);
+      res.status(200).send(schoolClass[0]);
     } catch (error) {
       res.status(400).send(error);
     }
@@ -260,6 +291,21 @@ async function startServer() {
       res.status(200).send(teacher);
     } catch (error) {
       res.status(400).send(error);
+    }
+  });
+
+  // Assign Class
+  app.put("/assignClass", verifyAuth, async (req, res) => {
+    let body = req.body;
+    if (checkBody(body)) {
+      try {
+        await Teacher.updateMany({ _id: { '$in': body.teachers } }, { class: body.class });
+        res.status(200).send("OK");
+      } catch (error) {
+        res.status(400).send(error);
+      }
+    } else {
+      res.status(400).send("Request Body not found");
     }
   });
 
@@ -406,6 +452,11 @@ async function startServer() {
           }
         }, {
           '$unset': 'user'
+        },
+        {
+          '$sort': {
+            '_id': -1
+          }
         }
       ]);
       res.status(200).send(leaves);
@@ -418,17 +469,80 @@ async function startServer() {
   app.post("/updateLeave", verifyAuth, async (req, res) => {
     let body = req.body;
     if (checkBody(body)) {
-      let result = await Leave.findByIdAndUpdate(body.id, {
-        $set: {
-          status: body.status,
-        }
-      }, { new: true });
-      res.status(200).send(result);
+      try {
+        let result = await Leave.findByIdAndUpdate(body.id, {
+          $set: {
+            status: body.status,
+          }
+        }, { new: true });
+        res.status(200).send(result);
+      } catch (error) {
+        res.status(400).send(error);
+      }
     } else {
       res.status(400).send("Request Body not found");
     }
   });
   // End Of Leaves
+
+  // Notices
+
+  // Add Notice
+
+  app.post("/addNotice", verifyAuth, async (req, res) => {
+    let body = req.body;
+    if (checkBody(body)) {
+      try {
+        let notice = new Notice(body);
+        await notice.save();
+        res.status(200).send("OK");
+      } catch (error) {
+        res.status(400).send(error);
+      }
+    } else {
+      res.status(400).send("Request Body not found");
+    }
+  });
+
+
+  // Get Notices
+
+  app.get("/getNotices", verifyAuth, async (req, res) => {
+    try {
+      let notices = await Notice.find({ school: req.query.school }).sort({ "_id": -1 });
+      res.status(200).send(notices);
+    } catch (error) {
+      res.status(400).send(error);
+    }
+  });
+
+  // End Notice
+
+  // Attendance
+
+  // Set Attendance
+  app.post("/setAttendance", verifyAuth, async (req, res) => {
+    let body = req.body;
+    if (checkBody(body)) {
+      try {
+        let users = body.users;
+        if (body.role == 1) {
+          await TeacherAttendance.insertMany(users)
+        } else {
+          await StudentAttendance.insertMany(users)
+        }
+        res.status(200).send("OK");
+      } catch (error) {
+        res.status(400).send(error);
+      } finally {
+        await session.endSession();
+      }
+    } else {
+      res.status(400).send("Request Body not found");
+    }
+  });
+
+  // End Attendance
 
   // Server Listening
   server.listen(PORT, () => {

@@ -11,6 +11,7 @@ class FormInput extends StatelessWidget {
   final int? maxLines;
   final List<TextInputFormatter>? inputFormatters;
   final TextInputAction? textInputAction;
+  final TextCapitalization textCapitalization;
 
   const FormInput(
       {Key? key,
@@ -20,6 +21,7 @@ class FormInput extends StatelessWidget {
       this.textEditingController,
       this.textInputType,
       this.textInputAction,
+      this.textCapitalization = TextCapitalization.characters,
       this.onSaved,
       this.maxLines,
       this.inputFormatters})
@@ -29,6 +31,7 @@ class FormInput extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       keyboardType: textInputType,
+      textCapitalization: textCapitalization,
       maxLines: maxLines,
       validator: validator,
       onSaved: onSaved,

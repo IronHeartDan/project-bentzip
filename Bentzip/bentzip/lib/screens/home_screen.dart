@@ -1,8 +1,11 @@
 import 'package:bentzip/models/user.dart';
+import 'package:bentzip/states/actions_state.dart';
 import 'package:bentzip/states/connection_state.dart';
 import 'package:bentzip/states/nav_state.dart';
+import 'package:bentzip/states/nav_title_state.dart';
 import 'package:bentzip/states/user_state.dart';
 import 'package:bentzip/utils/constants.dart';
+import 'package:bentzip/utils/repository.dart';
 import 'package:bentzip/utils/responsive.dart';
 import 'package:bentzip/widgets/drawer.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -22,10 +25,17 @@ class _HomeScreenState extends State<HomeScreen> {
   String currentTitle = adminSideNav[0].title;
   int last = 0;
   late User user;
+  late Repository repository;
 
   @override
   void initState() {
     user = context.read<UserState>().state!;
+    repository = RepositoryProvider.of<Repository>(context);
+    repository.user = user;
+    repository.headers = {
+      "Content-Type": "application/json",
+      "Authorization": user.token,
+    };
     Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
       if (result == ConnectivityResult.mobile ||
           result == ConnectivityResult.wifi ||
@@ -54,131 +64,158 @@ class _HomeScreenState extends State<HomeScreen> {
           ));
         }
       },
-      child: BlocBuilder<NavState, int>(builder: (blocContext, navState) {
+      child: BlocBuilder<NavState, int>(builder: (navContext, navState) {
         if (navState != -1) {
+          if (navState != 1 && navState != 5 && navState != 6) {
+            context.read<ActionsState>().setActions(null);
+          }
           last = navState;
-          currentTitle = user.role == 0
+          context.read<NavTitleState>().setNavTitle(user.role == 0
               ? adminSideNav[navState].title
               : user.role == 1
                   ? teacherSideNav[navState].title
-                  : studentSideNav[navState].title;
+                  : studentSideNav[navState].title);
         }
-        return Scaffold(
-          resizeToAvoidBottomInset: false,
-          appBar: Responsive.isSmall(context)
-              ? AppBar(
-                  elevation: 0,
-                  backgroundColor: primaryColor,
-                  leading: navState == -1
-                      ? InkWell(
-                          onTap: () {
-                            context.read<NavState>().setNav(last);
-                          },
-                          child: const Icon(Icons.arrow_back))
-                      : null,
-                  titleSpacing: 0,
-                  title: Text(currentTitle),
-                )
-              : null,
-          drawer: CustomDrawer(hide: true, prev: last),
-          body: Row(
-            children: [
-              !Responsive.isSmall(context)
-                  ? CustomDrawer(
-                      hide: false,
-                      prev: last,
+        return BlocBuilder<NavTitleState, String>(
+            builder: (titleContext, navTitleState) {
+          return BlocBuilder<ActionsState, List<Widget>?>(
+              builder: (actionContext, actionState) {
+            return Scaffold(
+              resizeToAvoidBottomInset: false,
+              appBar: Responsive.isSmall(context)
+                  ? AppBar(
+                      elevation: 0,
+                      backgroundColor: primaryColor,
+                      leading: navState == -1
+                          ? IconButton(
+                              onPressed: () {
+                                context.read<NavState>().setNav(last);
+                              },
+                              icon: const Icon(Icons.arrow_back))
+                          : null,
+                      titleSpacing: 0,
+                      title: Text(navTitleState),
+                      actions: actionState,
                     )
-                  : const FittedBox(),
-              Expanded(
-                child: Container(
-                    padding: !Responsive.isSmall(context)
-                        ? const EdgeInsets.all(25)
-                        : const EdgeInsets.all(0),
-                    color: secondaryColor,
-                    child: Column(
-                      children: [
-                        !Responsive.isSmall(context)
-                            ? Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    currentTitle,
-                                    style: TextStyle(
-                                        color: primaryColor,
-                                        fontSize: 36,
-                                        fontWeight: FontWeight.w700),
-                                  ),
-                                  Row(
+                  : null,
+              drawer: CustomDrawer(hide: true, prev: last),
+              body: Row(
+                children: [
+                  !Responsive.isSmall(context)
+                      ? CustomDrawer(
+                          hide: false,
+                          prev: last,
+                        )
+                      : const FittedBox(),
+                  Expanded(
+                    child: Container(
+                        padding: !Responsive.isSmall(context)
+                            ? const EdgeInsets.all(25)
+                            : const EdgeInsets.all(0),
+                        color: secondaryColor,
+                        child: Column(
+                          children: [
+                            !Responsive.isSmall(context)
+                                ? Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            roles[user.role],
+                                            navTitleState,
                                             style: TextStyle(
-                                                fontSize: 16,
                                                 color: primaryColor,
-                                                fontWeight: FontWeight.w600),
+                                                fontSize: 36,
+                                                fontWeight: FontWeight.w700),
                                           ),
-                                          Text(
-                                            user.name ?? user.school,
-                                            style: TextStyle(
-                                                fontSize: 16,
-                                                color: secondaryTextColor,
-                                                fontWeight: FontWeight.w400),
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
+                                          Row(
+                                            children: actionState ?? [],
                                           )
                                         ],
                                       ),
-                                      Container(
-                                        clipBehavior: Clip.hardEdge,
-                                        margin: const EdgeInsets.only(left: 24),
-                                        width: 60,
-                                        height: 60,
-                                        decoration: const BoxDecoration(
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(50))),
-                                        child: Image.asset(
-                                          "assets/logo.png",
-                                          fit: BoxFit.cover,
-                                        ),
+                                      Row(
+                                        children: [
+                                          Column(
+                                            children: [
+                                              Text(
+                                                roles[user.role],
+                                                style: TextStyle(
+                                                    fontSize: 16,
+                                                    color: primaryColor,
+                                                    fontWeight:
+                                                        FontWeight.w600),
+                                              ),
+                                              Text(
+                                                user.name ?? user.school,
+                                                style: TextStyle(
+                                                    fontSize: 16,
+                                                    color: secondaryTextColor,
+                                                    fontWeight:
+                                                        FontWeight.w400),
+                                              )
+                                            ],
+                                          ),
+                                          Container(
+                                            clipBehavior: Clip.hardEdge,
+                                            margin:
+                                                const EdgeInsets.only(left: 24),
+                                            width: 60,
+                                            height: 60,
+                                            decoration: const BoxDecoration(
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(50))),
+                                            child: Image.asset(
+                                              "assets/logo.png",
+                                              fit: BoxFit.cover,
+                                            ),
+                                          )
+                                        ],
                                       )
                                     ],
                                   )
-                                ],
-                              )
-                            : const FittedBox(),
-                        !Responsive.isSmall(context)
-                            ? const SizedBox(
-                                height: 40,
-                              )
-                            : const FittedBox(),
-                        BlocListener<NavState, int>(
-                          listener: (blocContext, navState) {
-                            if (pageController.hasClients && navState != -1) {
-                              pageController.animateToPage(navState,
-                                  duration: const Duration(milliseconds: 200),
-                                  curve: Curves.ease);
-                            }
-                          },
-                          child: Expanded(
-                            child: PageView(
-                              scrollDirection: Axis.vertical,
-                              physics: const NeverScrollableScrollPhysics(),
-                              controller: pageController,
-                              children: user.role == 0
-                                  ? adminSideScreens
-                                  : user.role == 1
-                                      ? teacherSideScreens
-                                      : studentSideScreens,
+                                : const FittedBox(),
+                            !Responsive.isSmall(context)
+                                ? const SizedBox(
+                                    height: 40,
+                                  )
+                                : const FittedBox(),
+                            BlocListener<NavState, int>(
+                              listener: (blocContext, navState) {
+                                if (pageController.hasClients &&
+                                    navState != -1) {
+                                  pageController.animateToPage(navState,
+                                      duration:
+                                          const Duration(milliseconds: 200),
+                                      curve: Curves.ease);
+                                }
+                              },
+                              child: Expanded(
+                                child: PageView(
+                                  scrollDirection: Axis.vertical,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  controller: pageController,
+                                  children: user.role == 0
+                                      ? adminSideScreens
+                                      : user.role == 1
+                                          ? teacherSideScreens
+                                          : studentSideScreens,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                      ],
-                    )),
+                          ],
+                        )),
+                  ),
+                ],
               ),
-            ],
-          ),
-        );
+            );
+          });
+        });
       }),
     );
   }
