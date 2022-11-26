@@ -76,5 +76,5 @@ final studentSideScreens = [
   const FittedBox(),
 ];
 
-// const String serverURL = "http://192.168.1.38:3001";
-const String serverURL = "https://bentzip.herokuapp.com";
+const String serverURL = "http://192.168.1.38:3001";
+// const String serverURL = "https://bentzip.herokuapp.com";

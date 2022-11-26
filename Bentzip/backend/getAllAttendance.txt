@@ -1,0 +1,29 @@
+[
+  {
+    '$match': {
+      'user': 202210012002
+    }
+  }, {
+    '$group': {
+      '_id': '$standard', 
+      'average': {
+        '$avg': '$present'
+      }
+    }
+  }, {
+    '$set': {
+      'average': {
+        '$multiply': [
+          '$average', 100
+        ]
+      }
+    }
+  }, {
+    '$replaceRoot': {
+      'newRoot': {
+        'class': '$_id', 
+        'percentage': '$average'
+      }
+    }
+  }
+]

@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:bentzip/models/school_teacher.dart';
 import 'package:bentzip/states/actions_state.dart';
 import 'package:bentzip/utils/repository.dart';
@@ -9,7 +7,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
 import 'package:sliver_tools/sliver_tools.dart';
 
 import '../models/user.dart';
@@ -29,6 +26,7 @@ class ClassDetails extends StatefulWidget {
 
 class _ClassDetailsState extends State<ClassDetails> {
   bool loading = false;
+  bool secondaryLoading = false;
   late User user;
   late var headers;
   late var details;
@@ -51,19 +49,13 @@ class _ClassDetailsState extends State<ClassDetails> {
       loading = true;
     });
 
-    var res = await http.get(Uri.parse("$serverURL/getClass?id=${widget.id}"),
-        headers: headers);
-
-    if (res.statusCode == 400) {
-      showSnack(res.body, true);
+    try {
+      details = await repository.getClassDetails(widget.id);
+    } catch (e) {
+      print(e);
       return;
-    }
-
-    if (res.statusCode == 200) {
-      var resBody = jsonDecode(res.body);
-      print(resBody);
+    } finally {
       setState(() {
-        details = resBody;
         loading = false;
       });
     }
@@ -80,13 +72,27 @@ class _ClassDetailsState extends State<ClassDetails> {
   }
 
   Future _assignTeacher() async {
+    setState(() {
+      secondaryLoading = true;
+    });
+    await Future.delayed(const Duration(seconds: 2));
     List<SchoolTeacher> teachers;
     List<int> selected = [];
+    List<int> toRemove = [];
     try {
       teachers = await repository.getTeachers();
+      for (var element in teachers) {
+        if (element.schoolClass == widget.id) {
+          element.selected = true;
+        }
+      }
     } catch (e) {
       print(e);
       return;
+    } finally {
+      setState(() {
+        secondaryLoading = false;
+      });
     }
     if (!mounted) return;
 
@@ -120,8 +126,16 @@ class _ClassDetailsState extends State<ClassDetails> {
                               subtitle: Text(teacher.id.toString()),
                               value: teacher.selected,
                               onChanged: (bool? value) {
+                                if(value == null) return;
+                                if(teacher.schoolClass == widget.id){
+                                  if(!value){
+                                    toRemove.add(teacher.id);
+                                  }else{
+                                    toRemove.add(teacher.id);
+                                  }
+                                }
                                 state(() {
-                                  teacher.selected = value ?? false;
+                                  teacher.selected = value;
                                   if (teacher.selected) {
                                     selected.add(teacher.id);
                                   } else {
@@ -146,6 +160,10 @@ class _ClassDetailsState extends State<ClassDetails> {
                     )),
                 IconButton(
                     onPressed: () async {
+                      if(selected.isEmpty && toRemove.isEmpty){
+                        navBack();
+                        return;
+                      }
                       navBack();
                       showDialog(
                           context: context,
@@ -153,11 +171,15 @@ class _ClassDetailsState extends State<ClassDetails> {
                             return const LoadingDialog(
                                 detail: "Assigning Teachers");
                           });
-                      var res = await Dio().put("$serverURL/assignClass",
+                      var assigned = await Dio().put("$serverURL/assignClass",
                           data: {"class": details["_id"], "teachers": selected},
                           options: Options(headers: headers));
+
+                      var removed = await Dio().put("$serverURL/assignClass",
+                          data: {"class": null, "teachers": toRemove},
+                          options: Options(headers: headers));
                       navBack();
-                      if (res.statusCode == 200) {
+                      if (assigned.statusCode == 200 && removed.statusCode == 200) {
                         showSnack("Teachers Assigned", false);
                         _getClass();
                       }
@@ -284,10 +306,17 @@ class _ClassDetailsState extends State<ClassDetails> {
               ],
             ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          _assignTeacher();
-        },
+        isExtended: !secondaryLoading,
+        onPressed: secondaryLoading
+            ? null
+            : () {
+                _assignTeacher();
+              },
         backgroundColor: primaryColor,
+        icon: secondaryLoading ? const SizedBox(
+            width: 25,
+            height: 25,
+            child: CircularProgressIndicator(color: Colors.white,)) : null,
         label: const Text("Assign Teacher"),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

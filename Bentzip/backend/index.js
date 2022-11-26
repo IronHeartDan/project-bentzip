@@ -534,8 +534,6 @@ async function startServer() {
         res.status(200).send("OK");
       } catch (error) {
         res.status(400).send(error);
-      } finally {
-        await session.endSession();
       }
     } else {
       res.status(400).send("Request Body not found");
@@ -543,6 +541,25 @@ async function startServer() {
   });
 
   // End Attendance
+
+
+  // Promote Students
+  app.post("/promote", verifyAuth, async (req, res) => {
+    let body = req.body;
+    if (checkBody(body)) {
+      console.log(await getLastClass(body.school)[0] == body.class);
+      res.status(200).send();
+    } else {
+      res.status(400).send("Request Body not found");
+    }
+  });
+  // End Promote Students
+
+  // Get Last Class
+  async function getLastClass(school) {
+    return await Class.find({school:school}).sort({standard:-1}).limit(1);
+  }
+  // End Get Last Class
 
   // Server Listening
   server.listen(PORT, () => {

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:bentzip/models/school_class.dart';
@@ -8,6 +9,9 @@ import 'package:bentzip/utils/responsive.dart';
 import 'package:bentzip/widgets/form_label.dart';
 import 'package:bentzip/widgets/primary_buttton.dart';
 import 'package:bentzip/widgets/secondary_buttton.dart';
+import 'package:bentzip/widgets/server_down.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -43,7 +47,8 @@ class _ClassScreenState extends State<ClassScreen>
   bool fabVisible = true;
 
   bool loading = false;
-  late List<Item> classes;
+  bool error = false;
+  List<Item> classes = [];
   late User user;
   late var header;
 
@@ -97,24 +102,36 @@ class _ClassScreenState extends State<ClassScreen>
   Future getClasses() async {
     setState(() {
       loading = true;
+      error = false;
     });
 
-    var res = await http.get(
-        Uri.parse("$serverURL/getClasses?school=${user.school}"),
-        headers: header);
+    try {
+      var res = await Dio()
+          .get("$serverURL/getClasses",
+              queryParameters: {
+                "school": user.school,
+              },
+              options: Options(headers: header));
 
-    if (res.statusCode == 400) {
-      showSnack(res.body, true);
-      return;
-    }
+      if (res.statusCode == 400) {
+        showSnack(res.data, true);
+        return;
+      }
 
-    if (res.statusCode == 200) {
-      var resBody = jsonDecode(res.body);
-      classes = (resBody as List)
-          .map((e) => Item(SchoolClass.fromJson(e), false))
-          .toList();
+      if (res.statusCode == 200) {
+        var resBody = jsonDecode(res.data);
+        classes = (resBody as List)
+            .map((e) => Item(SchoolClass.fromJson(e), false))
+            .toList();
+      }
       setState(() {
         loading = false;
+        error = false;
+      });
+    } on DioError catch(e) {
+      setState(() {
+        loading = false;
+        error = true;
       });
     }
   }
@@ -409,7 +426,7 @@ class _ClassScreenState extends State<ClassScreen>
                         curve: Curves.ease);
                   }
                 },
-                child: PageView(
+                child: error ? const ServerDown(): PageView(
                   controller: _navController,
                   physics: const NeverScrollableScrollPhysics(),
                   children: [
@@ -519,7 +536,7 @@ class _ClassScreenState extends State<ClassScreen>
         ),
         floatingActionButton: Responsive.isSmall(context)
             ? AnimatedScale(
-                scale: currentNav != 1
+                scale: error || loading ? 0 : currentNav != 1
                     ? 0
                     : fabVisible
                         ? 1

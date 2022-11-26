@@ -12,6 +12,7 @@ import '../models/user.dart';
 import '../states/user_state.dart';
 import '../utils/constants.dart';
 import '../utils/responsive.dart';
+import '../widgets/server_down.dart';
 
 class TeachersTable extends StatefulWidget {
   final Function showTeacherProfile;
@@ -37,6 +38,7 @@ class _TeachersTableState extends State<TeachersTable>
   late User user;
   late Map<String, String>? header;
   bool loading = false;
+  bool error = false;
   late List<Item> teachers;
   late Repository repository;
 
@@ -59,11 +61,14 @@ class _TeachersTableState extends State<TeachersTable>
     try {
       var res = await repository.getTeachers();
       teachers = res.map((e) => Item(e, false)).toList();
-    } catch (e) {
-      print(e);
-    } finally {
       setState(() {
         loading = false;
+        error = false;
+      });
+    } catch (e) {
+      setState(() {
+        loading = false;
+        error = true;
       });
     }
   }
@@ -132,6 +137,9 @@ class _TeachersTableState extends State<TeachersTable>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    if (error) {
+      return const ServerDown();
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

@@ -16,4 +16,13 @@ class Repository {
         options: Options(headers: headers));
     return (res.data as List).map((e) => SchoolTeacher.fromJson(e)).toList();
   }
+
+  Future getClassDetails(String id) async {
+    var res = await Dio().get("$serverURL/getClass",
+        queryParameters: {
+          "id": id,
+        },
+        options: Options(headers: headers));
+    return res.data;
+  }
 }

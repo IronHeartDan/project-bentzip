@@ -6,14 +6,18 @@ const StudentAttendance = mongoose.model("studentAttendance", new mongoose.Schem
         trim: true,
         required: true,
     },
-    standard: {
-        type: Number,
+    class: {
+        type: mongoose.Types.ObjectId,
         trim: true,
         required: true,
     },
     date: {
         type: Date,
-        default: Date.now(),
+        required: true,
+    },
+    present: {
+        type: Number,
+        required: true,
     }
 }), "attendance");
 
@@ -31,8 +35,8 @@ const TeacherAttendance = mongoose.model("teacherAttendance", new mongoose.Schem
     },
     date: {
         type: Date,
-        default: Date.now(),
+        required: true,
     }
 }), "attendance");
 
-module.exports = {StudentAttendance,TeacherAttendance};
+module.exports = { StudentAttendance, TeacherAttendance };
