@@ -11,7 +11,6 @@ import 'package:bentzip/widgets/primary_buttton.dart';
 import 'package:bentzip/widgets/secondary_buttton.dart';
 import 'package:bentzip/widgets/server_down.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -119,7 +118,7 @@ class _ClassScreenState extends State<ClassScreen>
       }
 
       if (res.statusCode == 200) {
-        var resBody = jsonDecode(res.data);
+        var resBody = res.data;
         classes = (resBody as List)
             .map((e) => Item(SchoolClass.fromJson(e), false))
             .toList();

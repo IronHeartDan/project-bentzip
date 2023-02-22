@@ -1,0 +1,40 @@
+[
+  {
+    '$match': {
+      'school': 123456, 
+      'standard': {
+        '$gt': 0
+      }
+    }
+  }, {
+    '$sort': {
+      'standard': 1
+    }
+  }, {
+    '$limit': 1
+  }, {
+    '$lookup': {
+      'from': 'users', 
+      'localField': '_id', 
+      'foreignField': 'class', 
+      'as': 'students', 
+      'pipeline': [
+        {
+          '$match': {
+            'role': 2
+          }
+        }, {
+          '$project': {
+            '_id': 1
+          }
+        }
+      ]
+    }
+  }, {
+    '$set': {
+      'students': {
+        '$size': '$students'
+      }
+    }
+  }
+]

@@ -28,6 +28,7 @@ const Counter = require("./models/counter");
 const Leave = require("./models/leave");
 const Notice = require("./models/notice");
 const { StudentAttendance, TeacherAttendance } = require("./models/attendance");
+const Record = require("./models/record");
 
 
 DB.connectDB()
@@ -66,6 +67,7 @@ async function startServer() {
         token: token,
         name: user.name ?? null,
         school: user.school,
+        class: user.class ?? null,
         id: user._id,
         role: user.role,
       });
@@ -546,20 +548,74 @@ async function startServer() {
   // Promote Students
   app.post("/promote", verifyAuth, async (req, res) => {
     let body = req.body;
+
     if (checkBody(body)) {
-      console.log(await getLastClass(body.school)[0] == body.class);
-      res.status(200).send();
+
+      let currentClass = await Class.findById(body.class);
+      let nextClasses = await getNextClasses(currentClass);
+
+      if (nextClasses.length == 0) {
+
+        // Get Students from the Higher class and Save Record
+        let students = await Student.find({ class: body.class });
+        students = students.map(student => {
+          student.class = null;
+          return new Record({ user: student })
+        });
+
+        let session = await mongoose.startSession();
+        try {
+          await session.withTransaction(async () => {
+            await Record.bulkSave(students, { session: session });
+
+            // Deleting From User Collection
+            await Student.deleteMany({ class: body.class }, { session: session });
+            res.status(200).send("OK");
+          });
+        } catch (error) {
+          res.status(400).send(error);
+        } finally {
+          session.endSession();
+        }
+
+      } else {
+
+        // Check for next class with Section
+        let nextClass = nextClasses.find(schoolClass => schoolClass.section == currentClass.section);
+        if (nextClass) {
+          // Check Student Count Of Higher Class
+          if (await getStudentCount(nextClass.id) == 0) {
+            // Updating Current Class Students to Higher Class
+            try {
+              await Student.updateMany({ class: currentClass.id }, { class: nextClass.id });
+              res.status(200).send("OK");
+            } catch (error) {
+              res.status(400).send(error);
+            }
+          } else {
+            res.status(400).send("Please Promote The Higher Class First.");
+          }
+        } else {
+          res.status(400).send("Higher Class Section Doesn't Exists");
+        }
+      }
     } else {
       res.status(400).send("Request Body not found");
     }
   });
-  // End Promote Students
+  // End Promote Studentsx
 
-  // Get Last Class
-  async function getLastClass(school) {
-    return await Class.find({school:school}).sort({standard:-1}).limit(1);
+  // Get Next Classes 
+  async function getNextClasses(currentClass) {
+    return await Class.find({ school: currentClass.school, standard: { "$gt": currentClass.standard } });
   }
-  // End Get Last Class
+  // End Get Next Classes 
+
+  // Get Student Count
+  async function getStudentCount(id) {
+    return (await Student.find({ class: id })).length;
+  }
+  // End Get Student Count
 
   // Server Listening
   server.listen(PORT, () => {

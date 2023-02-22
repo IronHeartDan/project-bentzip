@@ -25,4 +25,13 @@ class Repository {
         options: Options(headers: headers));
     return res.data;
   }
+
+  Future promoteClass(String classId) async {
+    var res = await Dio().post("$serverURL/promote",
+        data: {
+          "class": classId,
+        },
+        options: Options(headers: headers));
+    return res;
+  }
 }

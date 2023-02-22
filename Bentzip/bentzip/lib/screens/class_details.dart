@@ -67,8 +67,52 @@ class _ClassDetailsState extends State<ClassDetails> {
     context.read<ActionsState>().setActions([
       IconButton(
           onPressed: () {}, icon: const Icon(Icons.transfer_within_a_station)),
-      IconButton(onPressed: () {}, icon: const Icon(Icons.move_up_sharp)),
+      IconButton(
+          onPressed: () {
+            _promote();
+          },
+          icon: const Icon(Icons.move_up_sharp)),
     ]);
+  }
+
+  Future _promote() async {
+    try {
+      showDialog(
+          barrierDismissible: false,
+          context: context,
+          builder: (buildContext) {
+            return AlertDialog(
+              title: Text(
+                "Class  ${details["standard"]} : ${details["section"]}",
+              ),
+              backgroundColor: primaryColor,
+              content: SizedBox(
+                  width: 150,
+                  height: 150,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const CircularProgressIndicator(
+                        color: Colors.white,
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Text(
+                        "Promoting...",
+                        style: GoogleFonts.poppins(color: Colors.white),
+                      ),
+                    ],
+                  )),
+            );
+          });
+
+      var res = await repository.promoteClass(widget.id);
+      navBack();
+    } on DioError catch (e) {
+      showSnack("${e.response?.data}", true);
+      navBack();
+    }
   }
 
   Future _assignTeacher() async {
@@ -126,11 +170,11 @@ class _ClassDetailsState extends State<ClassDetails> {
                               subtitle: Text(teacher.id.toString()),
                               value: teacher.selected,
                               onChanged: (bool? value) {
-                                if(value == null) return;
-                                if(teacher.schoolClass == widget.id){
-                                  if(!value){
+                                if (value == null) return;
+                                if (teacher.schoolClass == widget.id) {
+                                  if (!value) {
                                     toRemove.add(teacher.id);
-                                  }else{
+                                  } else {
                                     toRemove.add(teacher.id);
                                   }
                                 }
@@ -160,7 +204,7 @@ class _ClassDetailsState extends State<ClassDetails> {
                     )),
                 IconButton(
                     onPressed: () async {
-                      if(selected.isEmpty && toRemove.isEmpty){
+                      if (selected.isEmpty && toRemove.isEmpty) {
                         navBack();
                         return;
                       }
@@ -179,7 +223,8 @@ class _ClassDetailsState extends State<ClassDetails> {
                           data: {"class": null, "teachers": toRemove},
                           options: Options(headers: headers));
                       navBack();
-                      if (assigned.statusCode == 200 && removed.statusCode == 200) {
+                      if (assigned.statusCode == 200 &&
+                          removed.statusCode == 200) {
                         showSnack("Teachers Assigned", false);
                         _getClass();
                       }
@@ -313,10 +358,14 @@ class _ClassDetailsState extends State<ClassDetails> {
                 _assignTeacher();
               },
         backgroundColor: primaryColor,
-        icon: secondaryLoading ? const SizedBox(
-            width: 25,
-            height: 25,
-            child: CircularProgressIndicator(color: Colors.white,)) : null,
+        icon: secondaryLoading
+            ? const SizedBox(
+                width: 25,
+                height: 25,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                ))
+            : null,
         label: const Text("Assign Teacher"),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

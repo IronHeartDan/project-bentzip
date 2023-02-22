@@ -58,7 +58,7 @@ final teacherSideNav = [
 final teacherSideScreens = [
   const DashBoardScreen(),
   const ProfileScreen(),
-  const FittedBox(),
+  const AttendanceScreen(),
   const FittedBox(),
 ];
 
@@ -76,5 +76,6 @@ final studentSideScreens = [
   const FittedBox(),
 ];
 
-const String serverURL = "http://192.168.1.38:3001";
+const String serverURL = "http://192.168.1.42:3001";
+// const String serverURL = "http://65.0.19.117:3000";
 // const String serverURL = "https://bentzip.herokuapp.com";

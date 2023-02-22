@@ -37,8 +37,8 @@ class _SplashScreenState extends State<SplashScreen> {
       return;
     }
 
-    var client = jsonDecode(check);
-    context.read<UserState>().setUser(User.fromJson(client));
+    var user = jsonDecode(check);
+    context.read<UserState>().setUser(User.fromJson(user));
     Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const HomeScreen()),
         (route) => false);

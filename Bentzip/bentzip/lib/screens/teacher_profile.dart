@@ -2,12 +2,8 @@ import 'package:bentzip/models/school_teacher.dart';
 import 'package:bentzip/utils/constants.dart';
 import 'package:bentzip/utils/responsive.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-
-import '../states/nav_title_state.dart';
-
 
 class TeacherProfile extends StatefulWidget {
   final SchoolTeacher teacher;
@@ -18,16 +14,11 @@ class TeacherProfile extends StatefulWidget {
   State<TeacherProfile> createState() => _TeacherProfileState();
 }
 
-class _TeacherProfileState extends State<TeacherProfile> {
-
-  @override
-  void initState() {
-    context.read<NavTitleState>().setNavTitle(widget.teacher.name);
-    super.initState();
-  }
-
+class _TeacherProfileState extends State<TeacherProfile>
+    with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
@@ -220,4 +211,7 @@ class _TeacherProfileState extends State<TeacherProfile> {
       ],
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

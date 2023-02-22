@@ -1,8 +1,8 @@
 [
   {
     '$match': {
-      'user': 202210012001, 
-      'standard': 1, 
+      'user': 202210012002, 
+      'standard': 3, 
       'date': {
         '$gte': new Date('Tue, 01 Nov 2022 00:00:00 GMT'), 
         '$lte': new Date('Wed, 30 Nov 2022 00:00:00 GMT')
@@ -10,7 +10,8 @@
     }
   }, {
     '$project': {
-      'date': 1
+      'date': 1, 
+      'present': 1
     }
   }
 ]

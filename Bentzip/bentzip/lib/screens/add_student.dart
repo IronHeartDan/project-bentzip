@@ -92,8 +92,8 @@ class _AddStudentState extends State<AddStudent> {
   }
 
   Future _getDivisions() async {
-    var index =
-        _classes.indexWhere((element) => element.standard == currentClass);
+    var index = _classes
+        .indexWhere((element) => element.standard == int.parse(currentClass));
     sectionsList = _classes[index]
         .classes
         .map((e) => DropdownMenuItem<String>(
@@ -811,14 +811,15 @@ class _AddStudentState extends State<AddStudent> {
                                     input["role"] = 2;
                                     var classIndex = _classes.indexWhere(
                                         (element) =>
-                                            element.standard == currentClass);
+                                            element.standard ==
+                                            int.parse(currentClass));
                                     var secIndex = _classes[classIndex]
                                         .classes
                                         .indexWhere((element) =>
                                             element["section"] ==
                                             currentSection);
                                     input["class"] = _classes[classIndex]
-                                        .classes[secIndex]["_id"];
+                                        .classes[secIndex]["id"];
                                     _addStudent();
                                   }
                                 },
