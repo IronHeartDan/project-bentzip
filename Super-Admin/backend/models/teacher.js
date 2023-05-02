@@ -31,7 +31,7 @@ const EducationSchema = new mongoose.Schema({
     trim: true,
     required: true,
   },
-});
+}, { _id: false });
 
 const Teacher = mongoose.model(
   "Teacher",
@@ -43,9 +43,10 @@ const Teacher = mongoose.model(
     },
     email: {
       unique: true,
+      sparse: true,
       type: String,
       trim: true,
-      required: true,
+      required: false,
     },
     password: {
       type: String,
@@ -77,8 +78,7 @@ const Teacher = mongoose.model(
       required: true,
     },
     class: {
-      type: String,
-      trim: true,
+      type: mongoose.Schema.Types.ObjectId,
     },
     role: {
       type: Number,

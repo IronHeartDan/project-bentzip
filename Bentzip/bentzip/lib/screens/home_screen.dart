@@ -65,9 +65,23 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       },
       child: BlocBuilder<NavState, int>(builder: (navContext, navState) {
-        if (navState != -1) {
-          if (navState != 1 && navState != 5 && navState != 6) {
-            context.read<ActionsState>().setActions(null);
+        if (navState != -1 && navState != -2) {
+          switch (user.role) {
+            case 0:
+              if (!adminSideNav[navState].hasMenu) {
+                context.read<ActionsState>().setActions(null);
+              }
+              break;
+            case 1:
+              if (!teacherSideNav[navState].hasMenu) {
+                context.read<ActionsState>().setActions(null);
+              }
+              break;
+            case 2:
+              if (!studentSideNav[navState].hasMenu) {
+                context.read<ActionsState>().setActions(null);
+              }
+              break;
           }
           last = navState;
           context.read<NavTitleState>().setNavTitle(user.role == 0
@@ -188,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             BlocListener<NavState, int>(
                               listener: (blocContext, navState) {
                                 if (pageController.hasClients &&
-                                    navState != -1) {
+                                    navState != -1 && navState != -2) {
                                   pageController.animateToPage(navState,
                                       duration:
                                           const Duration(milliseconds: 200),

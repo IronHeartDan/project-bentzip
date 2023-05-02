@@ -28,9 +28,10 @@ const Student = mongoose.model(
     },
     email: {
       unique: true,
+      sparse: true,
       type: String,
       trim: true,
-      required: true,
+      required: false,
     },
     password: {
       type: String,

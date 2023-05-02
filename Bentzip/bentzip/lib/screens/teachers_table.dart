@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:bentzip/models/school_teacher.dart';
 import 'package:bentzip/utils/repository.dart';
-import 'package:bentzip/widgets/primary_buttton.dart';
+import 'package:bentzip/widgets/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hexcolor/hexcolor.dart';

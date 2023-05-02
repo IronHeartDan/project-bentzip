@@ -6,8 +6,8 @@ const StudentAttendance = mongoose.model("studentAttendance", new mongoose.Schem
         trim: true,
         required: true,
     },
-    class: {
-        type: mongoose.Types.ObjectId,
+    standard: {
+        type: Number,
         trim: true,
         required: true,
     },

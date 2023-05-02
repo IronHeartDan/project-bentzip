@@ -6,8 +6,8 @@ import 'package:bentzip/screens/student_profile.dart';
 import 'package:bentzip/screens/students_table.dart';
 import 'package:bentzip/utils/constants.dart';
 import 'package:bentzip/utils/responsive.dart';
-import 'package:bentzip/widgets/primary_buttton.dart';
-import 'package:bentzip/widgets/secondary_buttton.dart';
+import 'package:bentzip/widgets/primary_button.dart';
+import 'package:bentzip/widgets/secondary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

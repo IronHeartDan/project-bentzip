@@ -14,6 +14,10 @@ const classSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  lastAttendanceDate: {
+    type: Date,
+    default: null,
+  },
 });
 
 classSchema.index({ "school": 1, "standard": 1, "section": 1 }, { unique: true });

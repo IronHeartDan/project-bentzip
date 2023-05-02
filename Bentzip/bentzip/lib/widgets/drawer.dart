@@ -84,7 +84,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
       if (state != -1) selected = state;
       return Drawer(
         elevation: 0,
-        backgroundColor: HexColor("#3D3774"),
+        backgroundColor: primaryColor,
         child: Column(
           children: [
             Expanded(

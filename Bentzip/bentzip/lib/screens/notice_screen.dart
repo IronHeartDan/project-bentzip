@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:bentzip/models/notice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:bentzip/models/notice.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/user.dart';
@@ -14,7 +14,7 @@ import '../utils/constants.dart';
 import '../utils/responsive.dart';
 import '../widgets/form_input.dart';
 import '../widgets/form_label.dart';
-import '../widgets/primary_buttton.dart';
+import '../widgets/primary_button.dart';
 
 class NoticeScreen extends StatefulWidget {
   const NoticeScreen({Key? key}) : super(key: key);
@@ -194,6 +194,8 @@ class _NoticeScreenState extends State<NoticeScreen>
       "description": description,
       "school": user.school,
     });
+
+
     var res = await http.post(Uri.parse("$serverURL/addNotice"),
         headers: header, body: body);
 
@@ -228,77 +230,141 @@ class _NoticeScreenState extends State<NoticeScreen>
     super.build(context);
     return BlocListener<NavState, int>(
       listener: (_, state) {
-        if (state == 5) {
-          context.read<ActionsState>().setActions([
-            IconButton(
-                onPressed: () {
-                  _getNotices();
-                },
-                icon: const Icon(Icons.refresh))
-          ]);
+        switch (user.role) {
+          case 0:
+            if (state == 4) {
+              context.read<ActionsState>().setActions([
+                IconButton(
+                    onPressed: () {
+                      _getNotices();
+                    },
+                    icon: const Icon(Icons.refresh))
+              ]);
+            }
+            break;
+          case 1:
+            if (state == 4) {
+              context.read<ActionsState>().setActions([
+                IconButton(
+                    onPressed: () {
+                      _getNotices();
+                    },
+                    icon: const Icon(Icons.refresh))
+              ]);
+            }
+            break;
+          case 2:
+            if (state == 3) {
+              context.read<ActionsState>().setActions([
+                IconButton(
+                    onPressed: () {
+                      _getNotices();
+                    },
+                    icon: const Icon(Icons.refresh))
+              ]);
+            }
+            break;
         }
       },
       child: Scaffold(
-        body: loading
-            ? Center(
-                child: CircularProgressIndicator(
-                  color: primaryColor,
-                ),
-              )
-            : Responsive.isSmall(context)
-                ? SingleChildScrollView(
-                    child: ExpansionPanelList(
-                      expansionCallback: (int index, bool isExpanded) {
-                        setState(() {
-                          notices[index].expanded = !isExpanded;
-                        });
-                      },
-                      children: notices
-                          .map((e) => ExpansionPanel(
-                                isExpanded: e.expanded,
-                                headerBuilder:
-                                    (BuildContext context, bool isExpanded) {
-                                  return ListTile(
-                                    title: Text(e.notice.title,
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.w500)),
-                                    subtitle: Text(e.notice.date),
-                                    leading: const Icon(Icons.notifications),
-                                  );
-                                },
-                                body: Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(e.notice.description),
-                                ),
-                              ))
-                          .toList(),
-                    ),
+        backgroundColor: Colors.transparent,
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            !Responsive.isSmall(context) && user.role == 0
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      PrimaryButton(
+                        text: "Add Notice",
+                        onPress: () {
+                          _addNotice();
+                        },
+                      )
+                    ],
                   )
-                : LayoutBuilder(
-                    builder: (buildContext, boxConstraints) {
-                      return SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: ConstrainedBox(
-                          constraints:
-                              BoxConstraints(minWidth: boxConstraints.minWidth),
-                          child: SingleChildScrollView(
-                            child: DataTable(
-                              columnSpacing: 10,
-                              showBottomBorder: true,
-                              columns: const [
-                                DataColumn(label: Text("Title")),
-                                DataColumn(label: Text("Description")),
-                                DataColumn(label: Text("Date")),
-                              ],
-                              rows: _buildRows(),
-                            ),
-                          ),
+                : const FittedBox(),
+            !Responsive.isSmall(context) && user.role == 0
+                ? const SizedBox(
+                    height: 20,
+                  )
+                : const FittedBox(),
+            Expanded(
+              child: Card(
+                margin: const EdgeInsets.all(0),
+                clipBehavior: Clip.hardEdge,
+                elevation: 0,
+                shape: !Responsive.isSmall(context)
+                    ? const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(20)))
+                    : const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(0))),
+                child: loading
+                    ? Center(
+                        child: CircularProgressIndicator(
+                          color: primaryColor,
                         ),
-                      );
-                    },
-                  ),
-        floatingActionButton: Responsive.isSmall(context)
+                      )
+                    : Responsive.isSmall(context)
+                        ? SingleChildScrollView(
+                            child: ExpansionPanelList(
+                              expansionCallback: (int index, bool isExpanded) {
+                                setState(() {
+                                  notices[index].expanded = !isExpanded;
+                                });
+                              },
+                              children: notices
+                                  .map((e) => ExpansionPanel(
+                                        isExpanded: e.expanded,
+                                        headerBuilder: (BuildContext context,
+                                            bool isExpanded) {
+                                          return ListTile(
+                                            title: Text(e.notice.title,
+                                                style: const TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.w500)),
+                                            subtitle: Text(e.notice.date),
+                                            leading:
+                                                const Icon(Icons.notifications),
+                                          );
+                                        },
+                                        body: Container(
+                                          width: double.infinity,
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text(e.notice.description),
+                                        ),
+                                      ))
+                                  .toList(),
+                            ),
+                          )
+                        : LayoutBuilder(
+                            builder: (buildContext, boxConstraints) {
+                              return SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                      minWidth: boxConstraints.minWidth),
+                                  child: SingleChildScrollView(
+                                    child: DataTable(
+                                      columnSpacing: 10,
+                                      showBottomBorder: true,
+                                      columns: const [
+                                        DataColumn(label: Text("Title")),
+                                        DataColumn(label: Text("Description")),
+                                        DataColumn(label: Text("Date")),
+                                      ],
+                                      rows: _buildRows(),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+              ),
+            ),
+          ],
+        ),
+        floatingActionButton: Responsive.isSmall(context) && user.role == 0
             ? AnimatedScale(
                 scale: 1,
                 duration: const Duration(milliseconds: 100),

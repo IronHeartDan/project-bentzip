@@ -6,9 +6,10 @@ import 'package:bentzip/screens/class_details.dart';
 import 'package:bentzip/utils/UpperCaseFormatter.dart';
 import 'package:bentzip/utils/constants.dart';
 import 'package:bentzip/utils/responsive.dart';
+import 'package:bentzip/widgets/empty_state.dart';
 import 'package:bentzip/widgets/form_label.dart';
-import 'package:bentzip/widgets/primary_buttton.dart';
-import 'package:bentzip/widgets/secondary_buttton.dart';
+import 'package:bentzip/widgets/primary_button.dart';
+import 'package:bentzip/widgets/secondary_button.dart';
 import 'package:bentzip/widgets/server_down.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -105,12 +106,11 @@ class _ClassScreenState extends State<ClassScreen>
     });
 
     try {
-      var res = await Dio()
-          .get("$serverURL/getClasses",
-              queryParameters: {
-                "school": user.school,
-              },
-              options: Options(headers: header));
+      var res = await Dio().get("$serverURL/getClasses",
+          queryParameters: {
+            "school": user.school,
+          },
+          options: Options(headers: header));
 
       if (res.statusCode == 400) {
         showSnack(res.data, true);
@@ -127,7 +127,7 @@ class _ClassScreenState extends State<ClassScreen>
         loading = false;
         error = false;
       });
-    } on DioError catch(e) {
+    } on DioError catch (e) {
       setState(() {
         loading = false;
         error = true;
@@ -425,121 +425,143 @@ class _ClassScreenState extends State<ClassScreen>
                         curve: Curves.ease);
                   }
                 },
-                child: error ? const ServerDown(): PageView(
-                  controller: _navController,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: [
-                    _currentClass != null
-                        ? ClassDetails(id: _currentClass!)
-                        : const FittedBox(),
-                    loading
-                        ? Center(
-                            child: CircularProgressIndicator(
-                              color: primaryColor,
-                            ),
-                          )
-                        : Responsive.isSmall(context)
-                            ? SingleChildScrollView(
-                                controller: _scrollController,
-                                child: ExpansionPanelList(
-                                  expansionCallback:
-                                      (int index, bool isExpanded) {
-                                    setState(() {
-                                      classes[index].expanded = !isExpanded;
-                                    });
-                                  },
-                                  children: classes
-                                      .map((e) => ExpansionPanel(
-                                            isExpanded: e.expanded,
-                                            headerBuilder:
-                                                (BuildContext context,
-                                                    bool isExpanded) {
-                                              return ListTile(
-                                                title: Text(
-                                                    "Class ${e.schoolClass.standard}",
-                                                    style: const TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.w500)),
-                                              );
+                child: error
+                    ? const ServerDown()
+                    : PageView(
+                        controller: _navController,
+                        physics: const NeverScrollableScrollPhysics(),
+                        children: [
+                          _currentClass != null
+                              ? ClassDetails(id: _currentClass!)
+                              : const FittedBox(),
+                          loading
+                              ? Center(
+                                  child: CircularProgressIndicator(
+                                    color: primaryColor,
+                                  ),
+                                )
+                              : classes.isEmpty
+                                  ? const EmptyState()
+                                  : Responsive.isSmall(context)
+                                      ? SingleChildScrollView(
+                                          controller: _scrollController,
+                                          child: ExpansionPanelList(
+                                            expansionCallback:
+                                                (int index, bool isExpanded) {
+                                              setState(() {
+                                                classes[index].expanded =
+                                                    !isExpanded;
+                                              });
                                             },
-                                            body: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  const Padding(
-                                                    padding:
-                                                        EdgeInsets.all(8.0),
-                                                    child: Text(
-                                                      "Sections",
-                                                      style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.w500),
-                                                    ),
-                                                  ),
-                                                  const SizedBox(
-                                                    height: 10,
-                                                  ),
-                                                  Wrap(
-                                                    children: _buildChips(
-                                                        e.schoolClass.classes),
-                                                  ),
-                                                  const SizedBox(
-                                                    height: 10,
-                                                  ),
-                                                  Center(
-                                                    child: SecondaryButton(
-                                                      text: "Add Section",
-                                                      onPress: () {
-                                                        _addClass(
-                                                            e.schoolClass, 1);
+                                            children: classes
+                                                .map((e) => ExpansionPanel(
+                                                      isExpanded: e.expanded,
+                                                      headerBuilder:
+                                                          (BuildContext context,
+                                                              bool isExpanded) {
+                                                        return ListTile(
+                                                          title: Text(
+                                                              "Class ${e.schoolClass.standard}",
+                                                              style: const TextStyle(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500)),
+                                                        );
                                                       },
-                                                    ),
-                                                  )
-                                                ],
+                                                      body: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(8.0),
+                                                        child: Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            const Padding(
+                                                              padding:
+                                                                  EdgeInsets
+                                                                      .all(8.0),
+                                                              child: Text(
+                                                                "Sections",
+                                                                style: TextStyle(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w500),
+                                                              ),
+                                                            ),
+                                                            const SizedBox(
+                                                              height: 10,
+                                                            ),
+                                                            Wrap(
+                                                              children:
+                                                                  _buildChips(e
+                                                                      .schoolClass
+                                                                      .classes),
+                                                            ),
+                                                            const SizedBox(
+                                                              height: 10,
+                                                            ),
+                                                            Center(
+                                                              child:
+                                                                  SecondaryButton(
+                                                                text:
+                                                                    "Add Section",
+                                                                onPress: () {
+                                                                  _addClass(
+                                                                      e.schoolClass,
+                                                                      1);
+                                                                },
+                                                              ),
+                                                            )
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ))
+                                                .toList(),
+                                          ),
+                                        )
+                                      : LayoutBuilder(
+                                          builder:
+                                              (buildContext, boxConstraints) {
+                                            return SingleChildScrollView(
+                                              scrollDirection: Axis.horizontal,
+                                              child: ConstrainedBox(
+                                                constraints: BoxConstraints(
+                                                    minWidth: boxConstraints
+                                                        .minWidth),
+                                                child: SingleChildScrollView(
+                                                  child: DataTable(
+                                                    columnSpacing: 10,
+                                                    showBottomBorder: true,
+                                                    columns: const [
+                                                      DataColumn(
+                                                          label: Text("Class")),
+                                                      DataColumn(
+                                                          label:
+                                                              Text("Section")),
+                                                    ],
+                                                    rows: _buildRows(),
+                                                  ),
+                                                ),
                                               ),
-                                            ),
-                                          ))
-                                      .toList(),
-                                ),
-                              )
-                            : LayoutBuilder(
-                                builder: (buildContext, boxConstraints) {
-                                  return SingleChildScrollView(
-                                    scrollDirection: Axis.horizontal,
-                                    child: ConstrainedBox(
-                                      constraints: BoxConstraints(
-                                          minWidth: boxConstraints.minWidth),
-                                      child: SingleChildScrollView(
-                                        child: DataTable(
-                                          columnSpacing: 10,
-                                          showBottomBorder: true,
-                                          columns: const [
-                                            DataColumn(label: Text("Class")),
-                                            DataColumn(label: Text("Section")),
-                                          ],
-                                          rows: _buildRows(),
+                                            );
+                                          },
                                         ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                  ],
-                ),
+                        ],
+                      ),
               ),
             ))
           ],
         ),
         floatingActionButton: Responsive.isSmall(context)
             ? AnimatedScale(
-                scale: error || loading ? 0 : currentNav != 1
+                scale: error || loading
                     ? 0
-                    : fabVisible
-                        ? 1
-                        : 0,
+                    : currentNav != 1
+                        ? 0
+                        : fabVisible
+                            ? 1
+                            : 0,
                 duration: const Duration(milliseconds: 100),
                 child: FloatingActionButton(
                   backgroundColor: primaryDarkColor,

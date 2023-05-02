@@ -16,7 +16,7 @@ import '../states/user_state.dart';
 import '../utils/responsive.dart';
 import '../widgets/form_input.dart';
 import '../widgets/form_label.dart';
-import '../widgets/primary_buttton.dart';
+import '../widgets/primary_button.dart';
 
 class AddStudent extends StatefulWidget {
   final Function handleNav;

@@ -1,13 +1,15 @@
+import 'package:bentzip/screens/class_leaves_management.dart';
+import 'package:bentzip/screens/manage_class.dart';
 import 'package:bentzip/screens/notice_screen.dart';
 import 'package:bentzip/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 
 import '../models/menu_model.dart';
+import '../screens/admin_leaves_management.dart';
 import '../screens/attendance_screen.dart';
 import '../screens/class_screen.dart';
 import '../screens/dashboard_screen.dart';
-import '../screens/leaves_screen.dart';
 import '../screens/student_screen.dart';
 import '../screens/teachers_screen.dart';
 
@@ -25,15 +27,13 @@ final red = HexColor("#F90706");
 final roles = ["Admin", "Teacher", "Student"];
 
 final adminSideNav = [
-  MenuModel(Icons.dashboard, "Dashboard"),
-  MenuModel(Icons.add_box_outlined, "Classes"),
-  MenuModel(Icons.add_box_outlined, "Teachers"),
-  MenuModel(Icons.add_box_outlined, "Students"),
-  MenuModel(Icons.add_box_outlined, "Attendance"),
-  MenuModel(Icons.add_box_outlined, "Notices"),
-  MenuModel(Icons.add_box_outlined, "Leave Approval"),
-  MenuModel(Icons.add_box_outlined, "Fee Management"),
-  MenuModel(Icons.power_settings_new, "Sign Out")
+  MenuModel(Icons.dashboard, "Dashboard", false),
+  MenuModel(Icons.meeting_room, "Classes", true),
+  MenuModel(Icons.supervised_user_circle, "Teachers", false),
+  MenuModel(Icons.people, "Students", false),
+  MenuModel(Icons.notifications_active, "Notices", true),
+  MenuModel(Icons.grading, "Leave Approval", true),
+  MenuModel(Icons.power_settings_new, "Sign Out", false)
 ];
 
 final adminSideScreens = [
@@ -41,41 +41,44 @@ final adminSideScreens = [
   const ClassScreen(),
   const TeachersScreen(),
   const StudentScreen(),
-  const AttendanceScreen(),
   const NoticeScreen(),
-  const LeavesScreen(),
-  const FittedBox(),
+  const AdminLeavesManagement(),
 ];
 
 final teacherSideNav = [
-  MenuModel(Icons.dashboard, "Dashboard"),
-  MenuModel(Icons.account_circle, "Profile"),
-  MenuModel(Icons.add_box_outlined, "Attendance"),
-  MenuModel(Icons.add_box_outlined, "Leave Approval"),
-  MenuModel(Icons.power_settings_new, "Sign Out")
+  MenuModel(Icons.dashboard, "Dashboard", false),
+  MenuModel(Icons.account_circle, "Profile", false),
+  MenuModel(Icons.add_box_outlined, "Attendance", false),
+  MenuModel(Icons.meeting_room, "Class", false),
+  MenuModel(Icons.notifications_active, "Notices", true),
+  MenuModel(Icons.grading, "Leave Approval", true),
+  MenuModel(Icons.power_settings_new, "Sign Out", false)
 ];
 
 final teacherSideScreens = [
   const DashBoardScreen(),
   const ProfileScreen(),
   const AttendanceScreen(),
-  const FittedBox(),
+  const ManageClass(),
+  const NoticeScreen(),
+  const ClassLeavesManagement(),
 ];
 
 final studentSideNav = [
-  MenuModel(Icons.dashboard, "Dashboard"),
-  MenuModel(Icons.account_circle, "Profile"),
-  MenuModel(Icons.add_box_outlined, "Attendance"),
-  MenuModel(Icons.power_settings_new, "Sign Out")
+  MenuModel(Icons.dashboard, "Dashboard", false),
+  MenuModel(Icons.account_circle, "Profile", false),
+  MenuModel(Icons.add_box_outlined, "Attendance", false),
+  MenuModel(Icons.notifications_active, "Notices", true),
+  MenuModel(Icons.power_settings_new, "Sign Out", false)
 ];
 
 final studentSideScreens = [
   const DashBoardScreen(),
   const ProfileScreen(),
-  const FittedBox(),
-  const FittedBox(),
+  const AttendanceScreen(),
+  const NoticeScreen(),
 ];
 
-const String serverURL = "http://192.168.1.42:3001";
-// const String serverURL = "http://65.0.19.117:3000";
+const String serverURL = "http://192.168.1.36:3001";
+// const String serverURL = "http://15.207.248.7:3000";
 // const String serverURL = "https://bentzip.herokuapp.com";

@@ -61,20 +61,6 @@ async function startServer() {
     }
   });
 
-  //Main Counter
-  app.post("/setMainCounter", verify, async (req, res) => {
-    try {
-      let counter = new mainCounter({
-        _id: 0,
-      });
-
-      await counter.save();
-      res.status(200).send("OK");
-    } catch (error) {
-      res.status(200).send(error);
-    }
-  });
-
   // Add School
   app.post("/addSchool", verify, async (req, res) => {
     var isEmpty = Object.keys(req.body).length == 0;
@@ -82,7 +68,7 @@ async function startServer() {
     if (body && !isEmpty) {
       let session = await mongoose.startSession();
       try {
-         await session.withTransaction(async () => {
+        await session.withTransaction(async () => {
           // Save School
           let school = new SchoolModel(body);
           await school.save({ session: session });
@@ -100,6 +86,14 @@ async function startServer() {
               session: session,
             }
           );
+
+          if (!count) {
+            let counter = new mainCounter({
+              _id: 0,
+            });
+
+            count = await counter.save({ session: session });
+          }
 
           // Save Unique School Counter
           let counter = new Counter({
@@ -122,16 +116,16 @@ async function startServer() {
           await session.commitTransaction();
 
           // Return
-          res.status(200).send(id);
+          res.status(200).send({ sucess: true, id: id });
         });
       } catch (error) {
         console.log(error);
-        res.status(400).send(error);
+        res.status(400).send({ sucess: false, error: error });
       } finally {
         await session.endSession();
       }
     } else {
-      res.status(400).send("Request Body not found");
+      res.status(400).send({ sucess: false, error: "Request Body not found" });
     }
   });
 

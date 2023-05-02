@@ -24,4 +24,4 @@ final sideNav = [
   MenuModel(Icons.power_settings_new, "Sign Out")
 ];
 
-const String serverURL = "http://192.168.1.38:3000";
+const String serverURL = "http://192.168.1.36:3000";

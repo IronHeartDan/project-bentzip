@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:bentzip/models/school_student.dart';
 import 'package:bentzip/utils/constants.dart';
-import 'package:bentzip/widgets/primary_buttton.dart';
+import 'package:bentzip/widgets/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

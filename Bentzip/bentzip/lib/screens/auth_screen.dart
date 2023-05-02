@@ -14,7 +14,7 @@ import 'package:http/http.dart' as http;
 import '../states/user_state.dart';
 import '../widgets/form_input.dart';
 import '../widgets/form_label.dart';
-import '../widgets/primary_buttton.dart';
+import '../widgets/primary_button.dart';
 import 'home_screen.dart';
 
 class AuthScreen extends StatefulWidget {

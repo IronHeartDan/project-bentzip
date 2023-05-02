@@ -12,19 +12,23 @@ class FormInput extends StatelessWidget {
   final List<TextInputFormatter>? inputFormatters;
   final TextInputAction? textInputAction;
   final TextCapitalization textCapitalization;
+  final Widget? suffixIcon;
+  final bool readOnly;
 
   const FormInput(
       {Key? key,
-      this.label,
-      this.onTap,
-      this.validator,
-      this.textEditingController,
-      this.textInputType,
-      this.textInputAction,
-      this.textCapitalization = TextCapitalization.characters,
-      this.onSaved,
-      this.maxLines,
-      this.inputFormatters})
+        this.label,
+        this.onTap,
+        this.validator,
+        this.textEditingController,
+        this.textInputType,
+        this.textInputAction,
+        this.textCapitalization = TextCapitalization.characters,
+        this.onSaved,
+        this.maxLines,
+        this.inputFormatters,
+        this.suffixIcon,
+        this.readOnly = false})
       : super(key: key);
 
   @override
@@ -39,7 +43,9 @@ class FormInput extends StatelessWidget {
       inputFormatters: inputFormatters,
       controller: textEditingController,
       textInputAction: textInputAction,
+      readOnly: readOnly,
       decoration: InputDecoration(
+          suffixIcon: suffixIcon,
           floatingLabelBehavior: FloatingLabelBehavior.never,
           label: label != null ? Text(label!) : const Text(""),
           border: const OutlineInputBorder(
