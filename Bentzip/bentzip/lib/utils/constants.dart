@@ -79,6 +79,5 @@ final studentSideScreens = [
   const NoticeScreen(),
 ];
 
-const String serverURL = "http://192.168.1.36:3001";
-// const String serverURL = "http://15.207.248.7:3000";
-// const String serverURL = "https://bentzip.herokuapp.com";
+// const String serverURL = "http://192.168.1.36:3001";
+const String serverURL = "https://api.bentzip.com";
